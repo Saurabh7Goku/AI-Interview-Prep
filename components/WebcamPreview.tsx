@@ -12,7 +12,7 @@ export default function WebcamPreview() {
           videoRef.current.srcObject = stream;
         }
       } catch (err) {
-        alert("Camera access denied.");
+        console.log("Camera access denied.", err);
       }
     };
 

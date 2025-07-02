@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import { Briefcase, User, ChevronDown, Sparkles, ArrowRight, CheckCircle, Star, Users, Target, Brain, Award, MessageSquare, Clock, Shield } from "lucide-react";
+import { Briefcase, Sparkles, ArrowRight, Star, Target, Brain, Award, MessageSquare, Clock, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
@@ -208,7 +208,7 @@ export default function Home() {
                       <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
                     ))}
                   </div>
-                  <p className="text-gray-700 mb-4 italic leading-relaxed">"{testimonial.text}"</p>
+                  <p className="text-gray-700 mb-4 italic leading-relaxed">{testimonial.text}</p>
                   <div>
                     <div className="font-semibold text-gray-800">{testimonial.name}</div>
                     <div className="text-sm text-gray-600">{testimonial.role} at {testimonial.company}</div>

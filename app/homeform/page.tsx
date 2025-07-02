@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Briefcase, User, ChevronDown, Sparkles, ArrowRight } from "lucide-react";
+import { useToast } from "@/components/ToastProvide";
+
 
 export default function HomeForm() {
     const router = useRouter();
@@ -23,7 +25,7 @@ export default function HomeForm() {
             localStorage.setItem("currentQuestionIndex", "0");
             router.push("/interview");
         } catch (error) {
-            alert("Failed to generate questions.");
+            console.log("Failed to generate questions.", error);
         } finally {
             setLoading(false);
         }
