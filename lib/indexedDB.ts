@@ -2,6 +2,14 @@ const DB_NAME = "InterviewResultsDB";
 const STORE_NAME = "results";
 let db: IDBDatabase | null = null;
 
+interface Result {
+  id: number;
+  question: string;
+  answer: string;
+  score: number;
+}
+
+
 export const initIndexedDB = (): Promise<void> => {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 1);
@@ -37,7 +45,7 @@ export const saveResultToIndexedDB = async (result: any): Promise<void> => {
   });
 };
 
-export const getAllResultsFromIndexedDB = (): Promise<any[]> => {
+export const getAllResultsFromIndexedDB = (): Promise<Result[]> => {
   return new Promise((resolve, reject) => {
     if (!db) return reject("DB not initialized");
 
@@ -45,7 +53,7 @@ export const getAllResultsFromIndexedDB = (): Promise<any[]> => {
     const store = transaction.objectStore(STORE_NAME);
     const request = store.getAll();
 
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => resolve(request.result as Result[]);
     request.onerror = () => reject("Failed to fetch results");
   });
 };
