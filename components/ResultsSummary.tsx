@@ -1,0 +1,77 @@
+// components/ResultsSummary.tsx
+
+"use client";
+
+import React from "react";
+import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github.css"; // You can choose any theme you like
+
+interface ResultsSummaryProps {
+    questions: string[];
+    answers: { [key: number]: string };
+    feedbacks: { [key: number]: string };
+    scores: { [key: number]: number };
+}
+
+export default function ResultsSummary({
+    questions,
+    answers,
+    feedbacks,
+    scores,
+}: ResultsSummaryProps) {
+    return (
+        <div className="space-y-8">
+            {questions.map((question, index) => {
+                const userAnswer = answers[index];
+                const feedback = feedbacks[index];
+                const score = scores[index];
+
+                return (
+                    <div key={index} className="border-b pb-6 border-gray-200 last:border-0">
+                        <h2 className="text-xl font-semibold text-gray-800 mb-3">
+                            Q{index + 1}: {question}
+                        </h2>
+
+                        {/* Skipped Question */}
+                        {userAnswer === "Skipped" ? (
+                            <>
+                                <p className="text-red-600 font-medium mb-3">You skipped this question.</p>
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <strong className="text-gray-700 block mb-2">Ideal Answer:</strong>
+                                    <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+                                        {feedback || "Ideal answer not available."}
+                                    </ReactMarkdown>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                {/* User's Answer */}
+                                <div className="mb-4">
+                                    <strong className="text-gray-700">Your Answer:</strong>
+                                    <p className="mt-1 text-gray-700">{userAnswer || "No answer recorded"}</p>
+                                </div>
+
+                                {/* Feedback */}
+                                <div className="mb-3">
+                                    <strong className="text-gray-700">Feedback:</strong>
+                                    <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+                                        {feedback || "No feedback available."}
+                                    </ReactMarkdown>
+                                </div>
+
+                                {/* Score */}
+                                <div>
+                                    <strong className="text-gray-700">Score:</strong>
+                                    <p className="mt-1 text-gray-700">
+                                        {score !== undefined ? `${score}/10` : "Not evaluated"}
+                                    </p>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
