@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Briefcase, User, ChevronDown, Sparkles, ArrowRight } from "lucide-react";
-import { useToast } from "@/components/ToastProvide";
 
 
 export default function HomeForm() {

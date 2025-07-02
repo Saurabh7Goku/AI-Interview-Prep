@@ -212,19 +212,19 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
 
                     <div
                         className={`backdrop-blur-sm rounded-3xl shadow-xl border p-6 ${avgScore >= 8
-                                ? "bg-green-50 border-green-200"
-                                : avgScore >= 6
-                                    ? "bg-yellow-50 border-yellow-200"
-                                    : "bg-red-50 border-red-200"
+                            ? "bg-green-50 border-green-200"
+                            : avgScore >= 6
+                                ? "bg-yellow-50 border-yellow-200"
+                                : "bg-red-50 border-red-200"
                             }`}
                     >
                         <div className="text-center">
                             <div
                                 className={`w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 ${avgScore >= 8
-                                        ? "text-green-600"
-                                        : avgScore >= 6
-                                            ? "text-yellow-600"
-                                            : "text-red-600"
+                                    ? "text-green-600"
+                                    : avgScore >= 6
+                                        ? "text-yellow-600"
+                                        : "text-red-600"
                                     }`}
                             >
                                 {avgScore >= 8 ? (
