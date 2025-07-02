@@ -9,7 +9,6 @@ interface Result {
   score: number;
 }
 
-
 export const initIndexedDB = (): Promise<void> => {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 1);

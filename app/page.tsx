@@ -4,7 +4,6 @@ import { Briefcase, Sparkles, ArrowRight, Star, Target, Brain, Award, MessageSqu
 import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const [setShowForm] = useState(false);
   const router = useRouter();
 
   const features = [
