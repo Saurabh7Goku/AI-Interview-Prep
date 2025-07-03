@@ -45,22 +45,22 @@ export default function Home() {
       rating: 4
     },
     {
-      name: "Renu Singh",
-      role: "Data Scientist",
+      name: "Renu Deshmukh",
+      role: "Data Analyst",
       company: "Analytics Inc",
       text: "Amazing tool! The AI generated questions that were exactly what I faced in my actual interview.",
       rating: 5
     },
     {
-      name: "Saurabh Deshmukh",
-      role: "SQL Developer",
+      name: "Vikesh Kumar",
+      role: "Cloud Engineer",
       company: "Startup XYZ",
       text: "Level-appropriate questions that boosted my confidence. Highly recommend for interview prep!",
       rating: 4
     },
     {
-      name: "Priya Sharma",
-      role: "Product Manager",
+      name: "Govind Kushwaha",
+      role: "Project Lead",
       company: "InnovateTech",
       text: "Comprehensive questions covering all aspects of product management. Excellent preparation tool!",
       rating: 5
@@ -73,9 +73,9 @@ export default function Home() {
       rating: 5
     },
     {
-      name: "Anita Verma",
-      role: "UX Designer",
-      company: "Design Studio",
+      name: "Harsh Tiwari",
+      role: "Software Developer",
+      company: "Salesforce",
       text: "Great variety of design thinking questions. Helped me articulate my design process better.",
       rating: 4
     }
@@ -229,7 +229,7 @@ export default function Home() {
         transform: translateX(0);
       }
       100% {
-        transform: translateX(-50%);
+        transform: translateX(-200%);
       }
     }
     
