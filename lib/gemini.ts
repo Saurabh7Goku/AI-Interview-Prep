@@ -45,14 +45,15 @@ export async function evaluateAnswer(question: string, userAnswer: string) {
         throw new Error("Missing GEMINI_API_KEY environment variable");
     }
 
-    const isCodingQuestion = /Write.*code|Write.*program|write.*code|write.*program|implement|code.*for/i.test(question);
+    const isCodingQuestion = /Write.*code|Write.*program|write.*code|write.*program|Write.*SQL|write.*SQL|write.*sql|write.*Sql|Write.*Sql|Write.*sql|Sql.*code|SQL.*code|Provide.*code|provide.*code|implement|code.*for/i.test(question);
     const prompt = `
 Evaluate this answer to the question "${question}":
 User Answer: "${userAnswer}"
-Provide the response in plain text with the following format:
-Ideal Answer: [Ideal answer here if theory question then keep it simple and short.]
+Ignore any meaningless words(can occurs due to transcript),
+Provide the response with the following format:
 Score: [Number from 0 to 10]
 Feedback: [Short feedback here]
+Ideal Answer: [Ideal answer here if theory question then keep it simple and short.]
 ${isCodingQuestion ? "If the question requires writing code, evaluate the correctness, syntax, and efficiency of the code. Ensure the ideal answer includes a correct code example."
  : ""}`.trim();
 
