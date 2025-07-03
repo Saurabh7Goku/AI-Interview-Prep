@@ -45,12 +45,12 @@ export async function evaluateAnswer(question: string, userAnswer: string) {
         throw new Error("Missing GEMINI_API_KEY environment variable");
     }
 
-    const isCodingQuestion = /write.*code|write.*program|implement|code.*for/i.test(question);
+    const isCodingQuestion = /Write.*code|Write.*program|write.*code|write.*program|implement|code.*for/i.test(question);
     const prompt = `
 Evaluate this answer to the question "${question}":
 User Answer: "${userAnswer}"
 Provide the response in plain text with the following format:
-Ideal Answer: [Ideal answer here]
+Ideal Answer: [Ideal answer here if theory question then keep it simple and short.]
 Score: [Number from 0 to 10]
 Feedback: [Short feedback here]
 ${isCodingQuestion ? "If the question requires writing code, evaluate the correctness, syntax, and efficiency of the code. Ensure the ideal answer includes a correct code example."
@@ -76,11 +76,43 @@ ${isCodingQuestion ? "If the question requires writing code, evaluate the correc
 
     const data = await response.json();
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    console.log("Raw Gemini response:", rawText); // Debug log
-
     if (!rawText.includes("Score:")) {
         return `Ideal Answer: Not available\nScore: 0\nFeedback: Unable to parse evaluation response from API.`;
     }
 
     return rawText;
+}
+
+export async function getIdealAnswer(question: string) {
+  if (!API_KEY) {
+      throw new Error("Missing GEMINI_API_KEY environment variable");
+  }
+
+  const isCodingQuestion = /write.*code|write.*program|implement|code.*for/i.test(question);
+  const prompt = `
+Provide the ideal answer for the following interview question: "${question}"
+Return only the ideal answer.
+${isCodingQuestion ? "If the question requires writing code, provide a correct and efficient code example." : ""}`.trim();
+
+  const response = await fetch(GEMINI_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+          contents: [
+              {
+                  role: "user",
+                  parts: [{ text: prompt }],
+              },
+          ],
+      }),
+  });
+
+  if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+  }
+
+  const data = await response.json();
+  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  return rawText.trim() || "Ideal answer not available.";
 }

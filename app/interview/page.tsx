@@ -134,7 +134,7 @@ export default function InterviewPage() {
             <div className="relative z-10">
                 <div className="bg-white/80 backdrop-blur-sm border-b border-blue-100 shadow-sm">
                     <div className="max-w-4xl mx-auto px-6 py-4">
-                        <div className="flex items-center justify-between">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center justify-between">
                             <div className="flex items-center space-x-4">
                                 <button
                                     onClick={() => router.back()}
@@ -174,28 +174,31 @@ export default function InterviewPage() {
 
                 {/* Progress Steps */}
                 <div className="max-w-4xl mx-auto px-6 py-6">
-                    <div className="flex items-center justify-center space-x-4">
+                    <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
                         {questions.map((_, index) => (
                             <div key={index} className="flex items-center">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${index < currentIndex
-                                    ? 'bg-green-500 border-green-500 text-white'
-                                    : index === currentIndex
-                                        ? 'bg-blue-600 border-blue-600 text-white animate-pulse'
-                                        : 'bg-white border-gray-300 text-gray-400'
-                                    }`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-300
+                                        ${index < currentIndex
+                                        ? 'bg-green-500 border-green-500 text-white'
+                                        : index === currentIndex
+                                            ? 'bg-blue-600 border-blue-600 text-white animate-pulse'
+                                            : 'bg-white border-gray-300 text-gray-400'}`}>
                                     {index < currentIndex ? (
                                         <CheckCircle className="w-4 h-4" />
                                     ) : (
                                         <span className="text-sm font-medium">{index + 1}</span>
                                     )}
                                 </div>
-                                {index < questions.length - 1 && (
-                                    <div className={`w-12 h-0.5 mx-2 transition-all duration-300 ${index < currentIndex ? 'bg-green-400' : 'bg-gray-300'
-                                        }`}></div>
-                                )}
+                                {index < questions.length - 1 &&
+                                    (
+                                        <div className={`h-0.5 mx-1 sm:mx-2 transition-all duration-300 w-6 sm:w-12
+                                            ${index < currentIndex ? 'bg-green-400' : 'bg-gray-300'}`}>
+                                        </div>
+                                    )}
                             </div>
                         ))}
                     </div>
+
                 </div>
             </div>
 

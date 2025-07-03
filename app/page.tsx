@@ -187,14 +187,15 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="relative z-10 px-6 py-20 overflow-hidden">
+      <section className="relative z-10 px-6 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-800 mb-6">Success Stories</h2>
             <p className="text-xl text-gray-600">See how others have succeeded with InterviewPrep AI</p>
           </div>
 
-          <div className="relative">
+          {/* Container with hidden overflow */}
+          <div className="relative overflow-hidden">
             {/* Moving container */}
             <div className="flex gap-6 animate-scroll">
               {duplicatedTestimonials.map((testimonial, index) => (
@@ -216,30 +217,30 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Gradient overlays for smooth fade effect */}
-            <div className="absolute left-0 top-0 w-32 h-full bg-gradient-to-r from-blue-50 via-blue-50/80 to-transparent pointer-events-none z-10"></div>
-            <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-blue-50 via-blue-50/80 to-transparent pointer-events-none z-10"></div>
+            {/* Enhanced gradient overlays for smooth fade effect */}
+            <div className="absolute left-0 top-0 w-20 h-full bg-gradient-to-r from-blue-50 to-transparent pointer-events-none z-10"></div>
+            <div className="absolute right-0 top-0 w-20 h-full bg-gradient-to-l from-blue-50 to-transparent pointer-events-none z-10"></div>
           </div>
         </div>
 
         <style jsx>{`
-          @keyframes scroll {
-            0% {
-              transform: translateX(0);
-            }
-            100% {
-              transform: translateX(-50%);
-            }
-          }
-          
-          .animate-scroll {
-            animation: scroll 30s linear infinite;
-          }
-          
-          .animate-scroll:hover {
-            animation-play-state: paused;
-          }
-        `}</style>
+    @keyframes scroll {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+    
+    .animate-scroll {
+      animation: scroll 30s linear infinite;
+    }
+    
+    .animate-scroll:hover {
+      animation-play-state: paused;
+    }
+  `}</style>
       </section>
 
       {/* CTA Section */}

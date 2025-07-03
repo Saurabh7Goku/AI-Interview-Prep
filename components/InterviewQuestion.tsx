@@ -1,7 +1,4 @@
-// components/InterviewQuestion.tsx
-
-"use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import CodeEditor from "@uiw/react-codemirror";
 import { dracula } from "@uiw/codemirror-theme-dracula";
@@ -17,15 +14,22 @@ export default function InterviewQuestion({
     total: number;
     onNext: (answer: string) => void;
 }) {
-    const isCodeQuestion = /write.*code|function/i.test(question);
+    const isCodeQuestion = /write.*code|Write.*code|Write.*a|write.*a|program|Program|Function|function/i.test(question);
     const [codeAnswer, setCodeAnswer] = useState("");
 
-    const { transcript, isListening, startListening, stopListening } =
+    const { transcript, isListening, startListening, stopListening, resetTranscript } =
         useSpeechRecognition();
+
+    // ✅ Reset transcript and code when question changes
+    useEffect(() => {
+        resetTranscript();
+        setCodeAnswer("");
+    }, [question]);
 
     const handleNextClick = () => {
         if (isListening) {
-            stopListening(); // Stop speech recognition before submitting
+            stopListening();
+            resetTranscript();
         }
 
         if (isCodeQuestion) {
@@ -37,10 +41,10 @@ export default function InterviewQuestion({
 
     const handleSkipClick = () => {
         if (isListening) {
-            stopListening(); // Stop listening if still active
+            stopListening();
+            resetTranscript();
         }
-
-        onNext("Skipped"); // Send a placeholder to move to next question
+        onNext("Skipped");
     };
 
     return (
