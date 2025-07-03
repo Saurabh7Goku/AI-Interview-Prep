@@ -11,6 +11,8 @@ import {
     CheckCircle,
     Star,
     Briefcase,
+    TrendingUp,
+    TrendingDown,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvide";
@@ -230,9 +232,9 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
                                 {avgScore >= 8 ? (
                                     <Trophy className="w-8 h-8" />
                                 ) : avgScore >= 6 ? (
-                                    <Target className="w-8 h-8" />
+                                    <TrendingUp className="w-8 h-8" />
                                 ) : (
-                                    <Star className="w-8 h-8" />
+                                    <TrendingDown className="w-8 h-8" />
                                 )}
                             </div>
                             <h3 className="text-lg font-semibold text-gray-800 mb-2">Performance</h3>
