@@ -1,5 +1,3 @@
-// lib/gemini.ts
-
 const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
 if (!API_KEY) {
@@ -8,11 +6,30 @@ if (!API_KEY) {
 
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
-export async function generateQuestions(jobProfile: string, experienceLevel: string) {
+export async function generateQuestions(
+  jobProfile: string, 
+  experienceLevel: string,
+  skills: [] | string,
+  interviewType: string,
+  language: string,
+  targetCompany: string,
+  focusTopics:[]|string
+) {
+
+  const jobProfileName = Array.isArray(jobProfile)?jobProfile.join(", ") : jobProfile
+  const skillsText = Array.isArray(skills) ? skills.join(", ") : skills;
+  const topicsText = Array.isArray(focusTopics) ? focusTopics.join(", ") : focusTopics;
+  const CompanyName = Array.isArray(targetCompany) ? targetCompany.join(", ") : targetCompany;
+
   const prompt = `
-Generate 5 technical interview questions for a ${jobProfile} at the ${experienceLevel} level.
-Include only the list of questions, one per line.
+  Generate 5 ${interviewType} interview questions for the role of ${jobProfileName} at ${experienceLevel} level.
+  Focus on the following skills: ${skillsText}.
+  ${CompanyName ? `The questions should be suitable for interviewing at ${CompanyName}.` : ""}
+  ${topicsText ? `Include questions covering these topics: ${topicsText}.` : ""}
+  Write the questions in ${language}.
+  Include only the list of questions, one per line.
   `.trim();
+  
 
   const response = await fetch(GEMINI_API_URL, {
     method: "POST",
