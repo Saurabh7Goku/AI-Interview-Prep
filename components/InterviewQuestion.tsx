@@ -14,7 +14,7 @@ export default function InterviewQuestion({
     total: number;
     onNext: (answer: string) => void;
 }) {
-    const isCodeQuestion = /write.*code|Write.*code|Write.*a|write.*a|program|Program|Function|function/i.test(question);
+    const isCodeQuestion = /write.*code|Write.*code|Write.*a|write.*a/i.test(question);
     const [codeAnswer, setCodeAnswer] = useState("");
 
     const { transcript, isListening, startListening, stopListening, resetTranscript } =
@@ -50,7 +50,7 @@ export default function InterviewQuestion({
     return (
         <div className="bg-white p-6 rounded shadow max-w-2xl mx-auto">
             <p className="text-sm text-gray-500 mb-2">Q{index} of {total}</p>
-            <h2 className="text-lg font-medium mb-4">{question}</h2>
+            <h2 className="text-sm md:text-lg font-medium mb-4">{question}</h2>
 
             {/* Show Code Editor if it's a code question */}
             {isCodeQuestion ? (
@@ -70,7 +70,7 @@ export default function InterviewQuestion({
                     <button
                         type="button"
                         onClick={isListening ? stopListening : startListening}
-                        className={`px-4 py-2 rounded ${isListening ? "bg-red-500" : "bg-green-500"} text-white`}
+                        className={`px-3 py-1 md:px-6 md:py-2 rounded ${isListening ? "bg-red-500" : "bg-green-500"} text-white`}
                     >
                         {isListening ? "Stop Talking" : "Start Talking"}
                     </button>
@@ -89,14 +89,14 @@ export default function InterviewQuestion({
                 <button
                     type="button"
                     onClick={handleSkipClick}
-                    className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded transition-colors"
+                    className="bg-blue-600 hover:bg-gray-600 text-white px-3 py-1 md:px-6 md:py-2 rounded transition-colors"
                 >
                     Skip
                 </button>
                 <button
                     type="button"
                     onClick={handleNextClick}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded transition-colors"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 md:px-6 md:py-2 rounded transition-colors"
                 >
                     Next
                 </button>

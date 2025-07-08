@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import InterviewQuestion from "@/components/InterviewQuestion";
 import { useRouter } from "next/navigation";
 import { evaluateAnswer } from "@/lib/gemini";
-import { Briefcase, Clock, MessageSquare, User, ArrowLeft, CheckCircle } from "lucide-react";
+import { Briefcase, Clock, MessageSquare, User, ArrowLeft, CheckCircle, Mic, Video, ChevronLeft, ChevronRight, Check, Camera, CameraOff, Menu, X } from "lucide-react";
+import WebcamPreview from "@/components/WebcamPreview"; // Import WebcamPreview component
 
 export default function InterviewPage() {
     const router = useRouter();
@@ -12,6 +13,11 @@ export default function InterviewPage() {
     const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
     const [feedbacks, setFeedbacks] = useState<Record<number, string>>({});
     const [scores, setScores] = useState<Record<number, number>>({});
+    const [timer, setTimer] = useState(0);
+    const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
+    const [isWebcamVisible, setIsWebcamVisible] = useState(false);
+    const [isWebcamMinimized, setIsWebcamMinimized] = useState(true);
+    const [webcamStream, setWebcamStream] = useState<MediaStream | null>(null);
 
     // Load questions from localStorage
     useEffect(() => {
@@ -24,6 +30,20 @@ export default function InterviewPage() {
         const idx = localStorage.getItem("currentQuestionIndex");
         if (idx) setCurrentIndex(parseInt(idx));
     }, []);
+
+    // Timer logic
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setTimer((prev) => prev + 1);
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [currentIndex]);
+
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+    };
 
     const handleNext = async (userAnswer: string) => {
         const updatedUserAnswers = {
@@ -40,6 +60,7 @@ export default function InterviewPage() {
             if (currentIndex < questions.length - 1) {
                 const nextIndex = currentIndex + 1;
                 setCurrentIndex(nextIndex);
+                setTimer(0);
                 localStorage.setItem("currentQuestionIndex", nextIndex.toString());
             } else {
                 await new Promise((resolve) => setTimeout(resolve, 50));
@@ -74,6 +95,7 @@ export default function InterviewPage() {
             if (currentIndex < questions.length - 1) {
                 const nextIndex = currentIndex + 1;
                 setCurrentIndex(nextIndex);
+                setTimer(0);
                 localStorage.setItem("currentQuestionIndex", nextIndex.toString());
             } else {
                 await new Promise((resolve) => setTimeout(resolve, 50));
@@ -103,17 +125,57 @@ export default function InterviewPage() {
         }
     };
 
+    const handlePrevious = () => {
+        if (currentIndex > 0) {
+            const prevIndex = currentIndex - 1;
+            setCurrentIndex(prevIndex);
+            setTimer(0);
+            localStorage.setItem("currentQuestionIndex", prevIndex.toString());
+        }
+    };
+
+    const toggleSidePanel = () => {
+        setIsSidePanelOpen(!isSidePanelOpen);
+    };
+
+    const toggleWebcam = () => {
+        if (isWebcamVisible) {
+            // Turn off the camera
+            setIsWebcamVisible(false);
+            if (webcamStream) {
+                // Stop all tracks in the stream
+                webcamStream.getTracks().forEach((track) => track.stop());
+                setWebcamStream(null); // Release the stream reference
+            }
+        } else {
+            // Turn on the camera
+            setIsWebcamVisible(true);
+            navigator.mediaDevices
+                .getUserMedia({ video: true, audio: false })
+                .then((stream) => {
+                    setWebcamStream(stream); // Store the stream
+                    // Use the stream for rendering (e.g., in a <video> element)
+                })
+                .catch((error) => {
+                    console.error("Error accessing camera:", error);
+                    setIsWebcamVisible(false); // Reset state if access fails
+                });
+        }
+    };
+
+    const toggleWebcamSize = () => {
+        setIsWebcamMinimized(!isWebcamMinimized);
+    };
+
     if (questions.length === 0) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center">
-                <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-blue-100 p-8 max-w-md w-full mx-4">
-                    <div className="text-center">
-                        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl mb-4">
-                            <Clock className="w-8 h-8 text-white animate-spin" />
-                        </div>
-                        <h2 className="text-xl font-semibold text-gray-800 mb-2">Loading Questions...</h2>
-                        <p className="text-gray-600">Preparing your personalized interview</p>
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
+                <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 p-8 max-w-md w-full mx-4 text-center animate-fade-in">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
+                        <Clock className="w-8 h-8 text-white animate-spin" />
                     </div>
+                    <h2 className="text-xl font-semibold text-gray-800 mb-2">Loading Questions...</h2>
+                    <p className="text-gray-600">Preparing your personalized interview</p>
                 </div>
             </div>
         );
@@ -122,131 +184,292 @@ export default function InterviewPage() {
     const progressPercent = ((currentIndex + 1) / questions.length) * 100;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
-            {/* Background Pattern */}
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-white relative overflow-hidden">
+            {/* Background Elements */}
             <div className="absolute inset-0 opacity-5">
-                <div className="absolute top-20 left-20 w-32 h-32 bg-blue-400 rounded-full blur-3xl"></div>
-                <div className="absolute bottom-20 right-20 w-40 h-40 bg-blue-600 rounded-full blur-3xl"></div>
-                <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-blue-300 rounded-full blur-2xl"></div>
+                <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
+                <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500 rounded-full blur-3xl transform translate-x-1/2 translate-y-1/2"></div>
             </div>
 
-            {/* Header */}
-            <div className="relative z-10">
-                <div className="bg-white/80 backdrop-blur-sm border-b border-blue-100 shadow-sm">
-                    <div className="max-w-4xl mx-auto px-6 py-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center justify-between">
-                            <div className="flex items-center space-x-4">
-                                <button
-                                    onClick={() => router.back()}
-                                    className="p-2 hover:bg-blue-50 rounded-xl transition-colors duration-200"
-                                >
-                                    <ArrowLeft className="w-5 h-5 text-gray-600" />
-                                </button>
-                                <div className="flex items-center space-x-3">
-                                    <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
-                                        <Briefcase className="w-6 h-6 text-white" />
-                                    </div>
-                                    <div>
-                                        <h1 className="text-xl font-bold text-gray-800">Interview Simulation</h1>
-                                        <p className="text-sm text-gray-600">AI-Powered Assessment</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center space-x-6">
-                                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                                    <MessageSquare className="w-4 h-4" />
-                                    <span>Question {currentIndex + 1} of {questions.length}</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500 ease-out"
-                                            style={{ width: `${progressPercent}%` }}
-                                        ></div>
-                                    </div>
-                                    <span className="text-sm font-medium text-gray-700">{Math.round(progressPercent)}%</span>
+            {/* Fixed Header */}
+            <header className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200 shadow-sm">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                            <button
+                                onClick={() => router.back()}
+                                className="p-2 hover:bg-slate-100 rounded-full transition-colors duration-200"
+                            >
+                                <ArrowLeft className="w-5 h-5 text-slate-600" />
+                            </button>
+                            <div className="flex items-center space-x-3">
+                                <div>
+                                    <h1 className="text-lg font-bold text-slate-800">Interview Practice</h1>
+                                    <p className="text-xs text-slate-500">AI-powered interview preparation</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                {/* Progress Steps */}
-                <div className="max-w-4xl mx-auto px-6 py-6">
-                    <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
-                        {questions.map((_, index) => (
-                            <div key={index} className="flex items-center">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-300
-                                        ${index < currentIndex
-                                        ? 'bg-green-500 border-green-500 text-white'
-                                        : index === currentIndex
-                                            ? 'bg-blue-600 border-blue-600 text-white animate-pulse'
-                                            : 'bg-white border-gray-300 text-gray-400'}`}>
-                                    {index < currentIndex ? (
-                                        <CheckCircle className="w-4 h-4" />
-                                    ) : (
-                                        <span className="text-sm font-medium">{index + 1}</span>
-                                    )}
+                        <div className="flex items-center space-x-4">
+                            <div className="hidden sm:flex items-center space-x-3">
+                                <div className="flex items-center space-x-2 text-sm text-slate-600">
+                                    <MessageSquare className="w-4 h-4" />
+                                    <span>Question {currentIndex + 1}/{questions.length}</span>
                                 </div>
-                                {index < questions.length - 1 &&
-                                    (
-                                        <div className={`h-0.5 mx-1 sm:mx-2 transition-all duration-300 w-6 sm:w-12
-                                            ${index < currentIndex ? 'bg-green-400' : 'bg-gray-300'}`}>
-                                        </div>
-                                    )}
+                                <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500 ease-out"
+                                        style={{ width: `${progressPercent}%` }}
+                                    ></div>
+                                </div>
+                                <span className="text-sm font-medium text-slate-700">{Math.round(progressPercent)}%</span>
                             </div>
-                        ))}
-                    </div>
 
+                            <button
+                                onClick={toggleSidePanel}
+                                className="p-2 hover:bg-slate-100 rounded-full transition-colors duration-200 lg:hidden"
+                            >
+                                <Menu className="w-5 h-5 text-slate-600" />
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </header>
 
             {/* Main Content */}
-            <main className="relative z-10 max-w-4xl mx-auto px-6 pb-8">
-                <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-blue-100 overflow-hidden">
-                    {/* Question Header */}
-                    <div className="grid grid-cols-2 bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
-                        <div className="flex items-center space-x-3 mb-2">
-                            <User className="w-6 h-6" />
-                            <span className="text-sm font-medium opacity-90">Interviewer</span>
-                        </div>
-                        <h2 className="text-lg font-semibold">Question {currentIndex + 1}</h2>
-                    </div>
+            <div className="pt-20 pb-8 min-h-screen">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full">
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full">
+                        {/* Main Interview Section */}
+                        <div className="lg:col-span-3 space-y-6">
+                            {/* Question Card */}
+                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+                                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                                                <User className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <span className="text-sm font-medium opacity-90">Interviewer</span>
+                                                <p className="text-xs opacity-75">Question {currentIndex + 1} of {questions.length}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center space-x-2 text-sm bg-white/10 rounded-full px-3 py-1">
+                                            <Clock className="w-4 h-4" />
+                                            <span className="font-mono">{formatTime(timer)}</span>
+                                        </div>
+                                    </div>
+                                </div>
 
-                    {/* Question Content */}
-                    <div className="p-8">
-                        <InterviewQuestion
-                            question={questions[currentIndex]}
-                            index={currentIndex + 1}
-                            total={questions.length}
-                            onNext={handleNext}
-                        />
+                                <div className="p-6">
+                                    <InterviewQuestion
+                                        question={questions[currentIndex]}
+                                        index={currentIndex + 1}
+                                        total={questions.length}
+                                        onNext={handleNext}
+                                    />
+
+                                    {/* Controls */}
+                                    <div className="flex grid grid-cols-1 items-center justify-between mt-6 pt-4 border-t border-slate-100">
+                                        <button
+                                            onClick={handlePrevious}
+                                            disabled={currentIndex === 0}
+                                            className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 text-sm font-medium
+                                                ${currentIndex === 0
+                                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:shadow-md'}`}
+                                        >
+                                            <ChevronLeft className="w-4 h-4" />
+                                            <span>Previous</span>
+                                        </button>
+
+                                        <div className="text-center">
+                                            <div className="text-xs text-slate-500 mb-1">
+                                                {currentIndex < questions.length - 1 ? "Keep going! You're doing amazing!" : "Final question - finish strong!"}
+                                            </div>
+                                        </div>
+
+                                        <div className="w-20"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Tips Section */}
+                            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-100">
+                                <h3 className="text-sm font-semibold text-blue-800 mb-3 flex items-center">
+                                    <MessageSquare className="w-4 h-4 mr-2" />
+                                    Pro Interview Tips
+                                </h3>
+                                <div className="grid sm:grid-cols-3 gap-4 text-sm text-blue-700">
+                                    <div className="flex items-start space-x-2">
+                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                        <span>Take time to think before answering</span>
+                                    </div>
+                                    <div className="flex items-start space-x-2">
+                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                        <span>Use specific examples from experience</span>
+                                    </div>
+                                    <div className="flex items-start space-x-2">
+                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                        <span>Structure answers clearly and concisely</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="lg:col-span-1 space-y-6">
+                            {/* Webcam Section */}
+                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200 p-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-sm font-semibold text-slate-800">Camera</h3>
+                                    <button
+                                        onClick={toggleWebcam}
+                                        className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg transition-all duration-200 text-sm font-medium
+                                            ${isWebcamVisible
+                                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                : 'bg-green-100 text-green-700 hover:bg-green-200'}`}
+                                    >
+                                        {isWebcamVisible ? (
+                                            <>
+                                                <CameraOff className="w-4 h-4" />
+                                                <span>Turn Off</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Camera className="w-4 h-4" />
+                                                <span>Turn On</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+
+                                {isWebcamVisible && (
+                                    <div className="space-y-3">
+                                        <WebcamPreview
+                                            onToggleSize={toggleWebcamSize}
+                                            isActive={isWebcamVisible}
+                                        />
+                                        <p className="text-xs text-slate-500 text-center">
+                                            Practice your body language and expressions
+                                        </p>
+                                    </div>
+                                )}
+
+                                {!isWebcamVisible && (
+                                    <div className="aspect-video bg-slate-100 rounded-lg flex items-center justify-center">
+                                        <div className="text-center">
+                                            <Camera className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                                            <p className="text-xs text-slate-500">Camera off</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Questions Navigation - Desktop */}
+                            <div className="hidden lg:block bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200 p-4">
+                                <h3 className="text-sm font-semibold text-slate-800 mb-4">All Questions</h3>
+                                <div className="space-y-2 max-h-96 overflow-y-auto">
+                                    {questions.map((question, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => {
+                                                setCurrentIndex(index);
+                                                setTimer(0);
+                                                localStorage.setItem("currentQuestionIndex", index.toString());
+                                            }}
+                                            className={`w-full text-left p-3 rounded-lg transition-all duration-200 group
+                                                ${index === currentIndex
+                                                    ? 'bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 shadow-md'
+                                                    : 'bg-slate-50 text-slate-700 hover:bg-slate-100 hover:shadow-md'}`}
+                                        >
+                                            <div className="flex items-center justify-between mb-1">
+                                                <span className="text-xs font-medium">Question {index + 1}</span>
+                                                {index < currentIndex && (
+                                                    <CheckCircle className="w-4 h-4 text-green-500" />
+                                                )}
+                                                {index === currentIndex && (
+                                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                                                )}
+                                            </div>
+                                            <p className="text-xs text-slate-600 line-clamp-2">{question}</p>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                {/* Tips Section */}
-                <div className="mt-6 bg-blue-50/50 backdrop-blur-sm rounded-2xl p-6 border border-blue-100">
-                    <h3 className="text-sm font-semibold text-blue-800 mb-3 flex items-center">
-                        <MessageSquare className="w-4 h-4 mr-2" />
-                        Interview Tips
-                    </h3>
-                    <div className="grid md:grid-cols-3 gap-4 text-sm text-blue-700">
-                        <div className="flex items-start space-x-2">
-                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                            <span>Take your time to think before answering</span>
-                        </div>
-                        <div className="flex items-start space-x-2">
-                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                            <span>Use specific examples from your experience</span>
-                        </div>
-                        <div className="flex items-start space-x-2">
-                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                            <span>Structure your answers clearly and concisely</span>
-                        </div>
+            {/* Mobile Questions Panel */}
+            <div className={`fixed inset-0 z-40 lg:hidden transform transition-transform duration-300 ${isSidePanelOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={toggleSidePanel}></div>
+                <div className="absolute right-0 top-0 bottom-0 w-80 bg-white shadow-2xl p-6 overflow-y-auto">
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-slate-800">All Questions</h3>
+                        <button
+                            onClick={toggleSidePanel}
+                            className="p-2 hover:bg-slate-100 rounded-full transition-colors duration-200"
+                        >
+                            <X className="w-5 h-5 text-slate-600" />
+                        </button>
+                    </div>
+
+                    <div className="space-y-3">
+                        {questions.map((question, index) => (
+                            <button
+                                key={index}
+                                onClick={() => {
+                                    setCurrentIndex(index);
+                                    setTimer(0);
+                                    setIsSidePanelOpen(false);
+                                    localStorage.setItem("currentQuestionIndex", index.toString());
+                                }}
+                                className={`w-full text-left p-4 rounded-xl transition-all duration-200
+                                    ${index === currentIndex
+                                        ? 'bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 shadow-lg'
+                                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100 hover:shadow-md'}`}
+                            >
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-medium">Question {index + 1}</span>
+                                    {index < currentIndex && (
+                                        <CheckCircle className="w-5 h-5 text-green-500" />
+                                    )}
+                                    {index === currentIndex && (
+                                        <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                                    )}
+                                </div>
+                                <p className="text-sm text-slate-600 line-clamp-3">{question}</p>
+                            </button>
+                        ))}
                     </div>
                 </div>
-            </main>
+            </div>
+
+            {/* CSS for animations */}
+            <style jsx>{`
+                .animate-fade-in {
+                    animation: fadeIn 0.6s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .line-clamp-2 {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+                .line-clamp-3 {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 3;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+            `}</style>
         </div>
     );
 }

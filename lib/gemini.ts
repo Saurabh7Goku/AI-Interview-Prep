@@ -22,7 +22,7 @@ export async function generateQuestions(
   const CompanyName = Array.isArray(targetCompany) ? targetCompany.join(", ") : targetCompany;
 
   const prompt = `
-  Generate 5 ${interviewType} interview questions for the role of ${jobProfileName} at ${experienceLevel} level.
+  Generate 10 ${interviewType} interview questions for the role of ${jobProfileName} at ${experienceLevel} level.
   Focus on the following skills: ${skillsText}.
   ${CompanyName ? `The questions should be suitable for interviewing at ${CompanyName}.` : ""}
   ${topicsText ? `Include questions covering these topics: ${topicsText}.` : ""}
