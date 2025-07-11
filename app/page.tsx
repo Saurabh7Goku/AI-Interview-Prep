@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Briefcase, Sparkles, ArrowRight, Star, Target, Brain, Award, MessageSquare, Clock, Shield, LogIn, LogOut } from "lucide-react";
+import { Briefcase, Sparkles, ArrowRight, Star, Target, Brain, Award, MessageSquare, Clock, Shield, LogIn, LogOut, History, X, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { auth, signOut } from "@/firebase/firebase";
 import { useToast } from "@/components/ToastProvide";
@@ -9,6 +9,7 @@ export default function Home() {
   const router = useRouter();
   const { showToast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -29,6 +30,10 @@ export default function Home() {
       showToast("❌ Failed to log out.", "error");
       console.error("Error logging out:", error);
     }
+  };
+
+  const handleNavigation = (path: string) => {
+    setIsSidebarOpen(false);
   };
 
   const features = [
@@ -117,16 +122,97 @@ export default function Home() {
         <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-blue-300 rounded-full blur-2xl"></div>
       </div>
 
+      {/* Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Mobile Sidebar */}
+      <div className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 md:hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}>
+        <div className="p-6">
+          {/* Sidebar Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
+                <Briefcase className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-xl font-bold text-gray-800">InterviewPrep AI</span>
+            </div>
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <X className="w-6 h-6 text-gray-600" />
+            </button>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="space-y-4">
+            <button
+              onClick={() => router.push("/homeform")}
+              className="w-full flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
+            >
+              <Sparkles className="w-5 h-5" />
+              <span>Get Started</span>
+            </button>
+
+            <button
+              onClick={() => router.push("/history")}
+              className="w-full flex items-center space-x-3 px-4 py-3 bg-blue-50 text-blue-600 font-semibold rounded-xl hover:bg-blue-100 transition-all duration-300"
+            >
+              <History className="w-5 h-5" />
+              <span>View History</span>
+            </button>
+
+            <div className="border-t border-gray-200 pt-4 mt-6">
+              {isAuthenticated ? (
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-3 px-4 py-3 bg-red-50 text-red-600 font-semibold rounded-xl hover:bg-red-100 transition-all duration-300"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span>Log Out</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleNavigation("/auth")}
+                  className="w-full flex items-center space-x-3 px-4 py-3 bg-green-50 text-green-600 font-semibold rounded-xl hover:bg-green-100 transition-all duration-300"
+                >
+                  <LogIn className="w-5 h-5" />
+                  <span>Log In</span>
+                </button>
+              )}
+            </div>
+          </nav>
+
+          {/* Sidebar Footer */}
+          <div className="absolute bottom-6 left-6 right-6">
+            <div className="flex items-center space-x-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+              <Shield className="w-4 h-4" />
+              <span>Powered by AI • Secure & Private</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Navigation */}
-      <nav className="relative z-10 px-6 py-4 bg-white/80 backdrop-blur-sm border-b border-blue-100 shadow-sm">
+      <nav className="relative z-10 px-4 sm:px-6 py-4 bg-white/80 backdrop-blur-sm border-b border-blue-100 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
-              <Briefcase className="w-6 h-6 text-white" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
+              <Briefcase className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-800">InterviewPrep AI</span>
+            <span className="text-lg sm:text-xl font-bold text-gray-800">
+              InterviewPrep AI
+            </span>
           </div>
-          <div className="flex items-center space-x-4">
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-4">
             <button
               onClick={() => router.push("/history")}
               className="px-6 py-2 bg-white/80 border border-blue-200 text-blue-600 font-semibold rounded-xl hover:bg-blue-50 transition-all duration-300"
@@ -149,13 +235,23 @@ export default function Home() {
               </button>
             ) : (
               <button
-                onClick={() => router.push("/auth")}
+                onClick={() => handleNavigation("/auth")}
                 className="px-6 py-2 bg-green-100 text-green-600 font-semibold rounded-xl hover:bg-green-200 transition-all duration-300 flex items-center space-x-2"
               >
                 <LogIn className="w-4 h-4" />
                 <span>Log In</span>
               </button>
             )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 bg-white/80 border border-blue-200 text-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-300"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
           </div>
         </div>
       </nav>
@@ -177,7 +273,7 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
-              onClick={() => router.push("/homeform")}
+              onClick={() => handleNavigation("/homeform")}
               className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center space-x-2"
             >
               <span>Start Preparing Now</span>
@@ -284,7 +380,7 @@ export default function Home() {
               Join thousands of successful candidates who prepared with InterviewPrep AI
             </p>
             <button
-              onClick={() => router.push("/homeform")}
+              onClick={() => handleNavigation("/homeform")}
               className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center space-x-2 mx-auto"
             >
               <Sparkles className="w-5 h-5" />
