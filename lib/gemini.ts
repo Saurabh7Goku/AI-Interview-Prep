@@ -22,7 +22,7 @@ export async function generateQuestions(
   const CompanyName = Array.isArray(targetCompany) ? targetCompany.join(", ") : targetCompany;
 
   const prompt = [
-    `Generate 10 ${interviewType} interview questions for the role of ${jobProfileName} at ${experienceLevel} level.`,
+    `Generate 5 ${interviewType} interview questions for the role of ${jobProfileName} at ${experienceLevel} level.`,
     `If question is of coding then add a tag "Coding Question" after the question.`,
     `Focus on the following skills: ${skillsText}.`,
     CompanyName && `The questions should be suitable for interviewing at ${CompanyName}.`,
@@ -70,7 +70,7 @@ export async function evaluateAnswer(question: string, userAnswer: string) {
         throw new Error("Missing GEMINI_API_KEY environment variable");
     }
 
-    const isCodingQuestion = /(write|provide|implement|create).*(code|program|sql)|sql.*code|Coding Question\s*$/i.test(question);
+    const isCodingQuestion = /(write|provide|implement|create).*(code|program|sql|python)|sql.*code|\(?\s*Coding Question\s*\)?\s*$/i.test(question);
     
     const prompt = `
     Evaluate this answer to the question: "${question}"
@@ -119,8 +119,10 @@ export async function getIdealAnswer(question: string) {
       throw new Error("Missing GEMINI_API_KEY environment variable");
   }
 
-  const isCodingQuestion = /write.*code|write.*program|implement|code.*for/i.test(question);
+  const isCodingQuestion = /(write|provide|implement|create).*(code|program|sql|python)|sql.*code|\(?\s*Coding Question\s*\)?\s*$/i.test(question);
+    
   const prompt = `
+Whatever you provide make sure to the Answer is very short(concise) not very detailed. no need to provide codes if not a coding question.
 Provide the ideal answer for the following interview question: "${question}"
 Return only the ideal answer.
 ${isCodingQuestion ? "If the question requires writing code, provide a correct and efficient code example." : ""}`.trim();

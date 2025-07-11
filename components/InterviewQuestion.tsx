@@ -15,14 +15,12 @@ export default function InterviewQuestion({
     onNext: (answer: string) => void;
 }) {
 
-    const isCodeQuestion = /(write|provide|implement|create).*(code|program|sql)|sql.*code|Coding Question\s*$/i.test(question);//REGEX for filtering Coding Ques..
+    const isCodeQuestion = /(write|provide|implement|create).*(code|program|sql|python)|sql.*code|\(?\s*Coding Question\s*\)?\s*$/i.test(question);//REGEX for filtering Coding Ques..
 
     const [codeAnswer, setCodeAnswer] = useState("");
 
     const { transcript, isListening, startListening, stopListening, resetTranscript } =
         useSpeechRecognition();
-
-    // ✅ Reset transcript and code when question changes
     useEffect(() => {
         resetTranscript();
         setCodeAnswer("");

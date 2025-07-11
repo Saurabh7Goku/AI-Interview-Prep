@@ -1,10 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import InterviewQuestion from "@/components/InterviewQuestion";
 import { useRouter } from "next/navigation";
 import { evaluateAnswer, getIdealAnswer } from "@/lib/gemini";
 import { auth, saveInterview } from "@/firebase/firebase";
-import { Briefcase, Clock, MessageSquare, User, ArrowLeft, CheckCircle, Camera, CameraOff, Menu, X } from "lucide-react";
+import { Briefcase, Clock, MessageSquare, User, ArrowLeft, CheckCircle, Camera, CameraOff, Menu, X, Volume2, VolumeX } from "lucide-react";
 import WebcamPreview from "@/components/WebcamPreview";
 import { useToast } from "@/components/ToastProvide";
 
@@ -22,6 +22,89 @@ export default function InterviewPage() {
     const [isWebcamMinimized, setIsWebcamMinimized] = useState(true);
     const [webcamStream, setWebcamStream] = useState<MediaStream | null>(null);
     const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+    const [isTtsEnabled, setIsTtsEnabled] = useState(true);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const prefixes = [
+        "Let's talk about",
+        "Tell me about",
+        "Please explain",
+        "Could you share",
+        "Let's discuss",
+        "I'd like to hear about",
+        "Can you describe",
+        "Please elaborate on",
+        "Share your thoughts on",
+        "Let's go over",
+        "Give me your thoughts on",
+        "Please tell me about",
+        "Walk me through",
+        "Talk to me about",
+    ];
+
+
+    useEffect(() => {
+        if (!isTtsEnabled || questions.length === 0 || !questions[currentIndex] || !window.speechSynthesis) {
+            if (!window.speechSynthesis) {
+                console.warn("Web Speech API not supported in this browser.");
+                showToast("❌ Text-to-speech is not supported in your browser.", "error");
+            }
+            return;
+        }
+
+        const playQuestionAudio = () => {
+            try {
+                // Cancel any ongoing speech
+                window.speechSynthesis.cancel();
+
+                // Select a prefix based on currentIndex
+                const prefix = prefixes[currentIndex % prefixes.length];
+                const utterance = new SpeechSynthesisUtterance(`${prefix}, ${questions[currentIndex]}`);
+                utterance.lang = "en-US";
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+
+                // Select a female voice if available
+                const voices = window.speechSynthesis.getVoices();
+                const femaleVoice = voices.find((voice) => voice.lang === "en-US" && (voice.name.includes("female") || voice.name.includes("Google US English")));
+                if (femaleVoice) {
+                    utterance.voice = femaleVoice;
+                }
+
+                window.speechSynthesis.speak(utterance);
+
+                utterance.onerror = (event) => {
+                    console.error("Speech synthesis error:", event.error);
+                    showToast(`❌ Failed to play audio: ${event.error}. Please check browser settings.`, "error");
+                };
+            } catch (error) {
+                console.error("TTS error:", error);
+                showToast(`❌ Failed to generate audio: ${error instanceof Error ? error.message : "Unknown error"}`, "error");
+            }
+        };
+
+        // Ensure voices are loaded before playing
+        if (window.speechSynthesis.getVoices().length === 0) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                if (timeoutRef.current) {
+                    clearTimeout(timeoutRef.current);
+                }
+                timeoutRef.current = setTimeout(playQuestionAudio, 1000);
+            };
+        } else {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+            timeoutRef.current = setTimeout(playQuestionAudio, 1000);
+        }
+
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+            window.speechSynthesis.cancel();
+        };
+    }, [currentIndex, questions, isTtsEnabled, showToast]);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -67,12 +150,18 @@ export default function InterviewPage() {
             return;
         }
 
+        // Save the current answer
         const updatedUserAnswers = { ...userAnswers, [currentIndex]: userAnswer };
         setUserAnswers(updatedUserAnswers);
         localStorage.setItem("userAnswers", JSON.stringify(updatedUserAnswers));
 
+        let updatedFeedbacks = { ...feedbacks };
+        let updatedScores = { ...scores };
+
+        // Evaluate the answer or get ideal answer for skipped question
         if (userAnswer === "Skipped") {
             try {
+                console.log(`Fetching ideal answer for question ${currentIndex + 1}: ${questions[currentIndex]}`);
                 const idealAnswer = await getIdealAnswer(questions[currentIndex]);
                 const updatedFeedbacks = {
                     ...feedbacks,
@@ -80,28 +169,37 @@ export default function InterviewPage() {
                 };
                 setFeedbacks(updatedFeedbacks);
                 localStorage.setItem("feedbacks", JSON.stringify(updatedFeedbacks));
+                console.log(`Ideal answer saved for question ${currentIndex + 1}`);
             } catch (error) {
                 console.error("Error fetching ideal answer:", error);
                 showToast("❌ Failed to fetch ideal answer.", "error");
+                updatedFeedbacks = {
+                    ...feedbacks,
+                    [currentIndex]: `Evaluation failed: ${error instanceof Error ? error.message : String(error)}`,
+                };
+                setFeedbacks(updatedFeedbacks);
+                localStorage.setItem("feedbacks", JSON.stringify(updatedFeedbacks));
             }
         } else {
             try {
+                console.log(`Evaluating answer for question ${currentIndex + 1}: ${questions[currentIndex]}`);
                 const evaluation = await evaluateAnswer(questions[currentIndex], userAnswer);
                 const match = evaluation.match(/(?:\*\*)?Score:(?:\*\*)?\s*(\d+)(?:\/10)?/i);
                 const score = match ? parseInt(match[1]) : 0;
 
-                const updatedFeedbacks = { ...feedbacks, [currentIndex]: evaluation };
-                const updatedScores = { ...scores, [currentIndex]: score };
+                updatedFeedbacks = { ...feedbacks, [currentIndex]: evaluation };
+                updatedScores = { ...scores, [currentIndex]: score };
 
                 setFeedbacks(updatedFeedbacks);
                 setScores(updatedScores);
 
                 localStorage.setItem("feedbacks", JSON.stringify(updatedFeedbacks));
                 localStorage.setItem("scores", JSON.stringify(updatedScores));
+                console.log(`Evaluation saved for question ${currentIndex + 1}: Score ${score}`);
             } catch (error) {
                 console.error("Evaluation error:", error);
                 showToast("❌ Failed to evaluate answer.", "error");
-                const updatedFeedbacks = {
+                updatedFeedbacks = {
                     ...feedbacks,
                     [currentIndex]: `Evaluation failed: ${error instanceof Error ? error.message : String(error)}`,
                 };
@@ -110,24 +208,28 @@ export default function InterviewPage() {
             }
         }
 
+        // Proceed to next question or save and redirect
         if (currentIndex < questions.length - 1) {
             const nextIndex = currentIndex + 1;
             setCurrentIndex(nextIndex);
             setTimer(0);
             localStorage.setItem("currentQuestionIndex", nextIndex.toString());
+            console.log(`Moving to question ${nextIndex + 1}`);
         } else {
             try {
+                console.log("Saving interview to Firebase:", { userId: user.uid, questions, answers: updatedUserAnswers, feedbacks: updatedFeedbacks, scores: updatedScores });
                 await saveInterview(user.uid, {
                     questions,
                     answers: updatedUserAnswers,
-                    feedbacks,
-                    scores,
+                    feedbacks: updatedFeedbacks,
+                    scores: updatedScores,
                 });
                 showToast("✅ Interview saved successfully!", "success");
+                console.log("Interview saved successfully, redirecting to /results");
                 router.push("/results");
             } catch (error) {
-                showToast("❌ Failed to save interview.", "error");
                 console.error("Error saving interview:", error);
+                showToast("❌ Failed to save interview.", "error");
                 router.push("/results");
             }
         }
@@ -170,6 +272,49 @@ export default function InterviewPage() {
 
     const toggleWebcamSize = () => {
         setIsWebcamMinimized(!isWebcamMinimized);
+    };
+
+    const toggleTts = () => {
+        setIsTtsEnabled(!isTtsEnabled);
+        if (!isTtsEnabled && questions[currentIndex] && window.speechSynthesis) {
+            replayQuestion();
+        } else {
+            window.speechSynthesis.cancel();
+        }
+    };
+
+    const replayQuestion = () => {
+        if (!questions[currentIndex] || !window.speechSynthesis) {
+            if (!window.speechSynthesis) {
+                showToast("❌ Text-to-speech is not supported in your browser.", "error");
+            }
+            return;
+        }
+
+        try {
+            window.speechSynthesis.cancel();
+            const prefix = prefixes[currentIndex % prefixes.length];
+            const utterance = new SpeechSynthesisUtterance(`${prefix}, ${questions[currentIndex]}`);
+            utterance.lang = "en-US";
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+
+            const voices = window.speechSynthesis.getVoices();
+            const femaleVoice = voices.find((voice) => voice.lang === "en-US" && (voice.name.includes("female") || voice.name.includes("Google US English")));
+            if (femaleVoice) {
+                utterance.voice = femaleVoice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+
+            utterance.onerror = (event) => {
+                console.error("Speech synthesis error:", event.error);
+                showToast(`❌ Failed to play audio: ${event.error}. Please check browser settings.`, "error");
+            };
+        } catch (error) {
+            console.error("TTS replay error:", error);
+            showToast(`❌ Failed to replay audio: ${error instanceof Error ? error.message : "Unknown error"}`, "error");
+        }
     };
 
     if (isLoadingAuth) {
@@ -241,6 +386,13 @@ export default function InterviewPage() {
                                 <span className="text-sm font-medium text-slate-700">{Math.round(progressPercent)}%</span>
                             </div>
                             <button
+                                onClick={toggleTts}
+                                className={`p-2 rounded-full transition-colors duration-200 ${isTtsEnabled ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
+                                    }`}
+                            >
+                                {isTtsEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                            </button>
+                            <button
                                 onClick={toggleSidePanel}
                                 className="p-2 hover:bg-slate-100 rounded-full transition-colors duration-200 lg:hidden"
                             >
@@ -255,7 +407,7 @@ export default function InterviewPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full">
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full">
                         <div className="lg:col-span-3 space-y-6">
-                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+                            <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
                                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center space-x-3">
@@ -280,7 +432,7 @@ export default function InterviewPage() {
                                         total={questions.length}
                                         onNext={handleNext}
                                     />
-                                    <div className="flex grid grid-cols-1 items-center justify-between mt-6 pt-4 border-t border-slate-100">
+                                    <div className="flex grid grid-cols-1 sm:grid-cols-3 items-center justify-between mt-6 pt-4 border-t border-slate-100">
                                         <button
                                             onClick={handlePrevious}
                                             disabled={currentIndex === 0}
@@ -297,7 +449,13 @@ export default function InterviewPage() {
                                                 {currentIndex < questions.length - 1 ? "Keep going! You're doing amazing!" : "Final question - finish strong!"}
                                             </div>
                                         </div>
-                                        <div className="w-20"></div>
+                                        <button
+                                            onClick={replayQuestion}
+                                            className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 hover:shadow-md transition-all duration-200 text-sm font-medium"
+                                        >
+                                            <Volume2 className="w-4 h-4" />
+                                            <span>Play Question</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -323,7 +481,7 @@ export default function InterviewPage() {
                             </div>
                         </div>
                         <div className="lg:col-span-1 space-y-6">
-                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200 p-4">
+                            <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 p-4">
                                 <div className="flex items-center justify-between mb-4">
                                     <h3 className="text-sm font-semibold text-slate-800">Camera</h3>
                                     <button
@@ -366,7 +524,7 @@ export default function InterviewPage() {
                                     </div>
                                 )}
                             </div>
-                            <div className="hidden lg:block bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200 p-4">
+                            <div className="hidden lg:block bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 p-4">
                                 <h3 className="text-sm font-semibold text-slate-800 mb-4">All Questions</h3>
                                 <div className="space-y-2 max-h-96 overflow-y-auto">
                                     {questions.map((question, index) => (
