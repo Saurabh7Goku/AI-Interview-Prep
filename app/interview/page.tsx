@@ -36,7 +36,7 @@ export default function InterviewPage() {
             const storedQuestions = localStorage.getItem("questions");
             if (storedQuestions) {
                 const parsed = JSON.parse(storedQuestions);
-                setQuestions(parsed.length > 5 ? parsed.slice(0, 5) : parsed);
+                setQuestions(parsed.length > 10 ? parsed.slice(0, 10) : parsed);
             }
             const idx = localStorage.getItem("currentQuestionIndex");
             if (idx) setCurrentIndex(parseInt(idx));

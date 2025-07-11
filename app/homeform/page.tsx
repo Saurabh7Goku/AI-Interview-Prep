@@ -20,7 +20,6 @@ import {
     Server,
     Camera,
     Star,
-    Clock,
     Target,
     ListChecks,
     Languages,
@@ -77,20 +76,6 @@ export default function HomeForm() {
         { icon: TrendingUp, title: "Business", roles: ["Product Manager", "Business Analyst", "Consultant"] },
         { icon: Shield, title: "Security", roles: ["DevOps", "Cloud Engineer", "Cybersecurity"] }
     ];
-
-    // const predefinedSkills = [
-    //     "Python", "JavaScript", "React", "Node.js", "SQL", "AWS", "Docker", "Git",
-    //     "Communication", "Leadership", "Problem Solving", "Team Work", "Project Management",
-    //     "Java", "C++", "MongoDB", "PostgreSQL", "Machine Learning", "Data Analysis"
-    // ];
-
-    // const interviewTypes = [
-    //     { value: "Technical", label: "Technical Interview", desc: "Coding, system design, technical concepts" },
-    //     { value: "HR", label: "HR Interview", desc: "Behavioral, cultural fit, company-specific" },
-    //     { value: "Managerial", label: "Managerial Interview", desc: "Leadership, management scenarios" },
-    //     { value: "Case Study", label: "Case Study", desc: "Problem-solving, analytical thinking" },
-    //     { value: "Group Discussion", label: "Group Discussion", desc: "Communication, teamwork, debate skills" }
-    // ];
 
     const floatingElements = [
         { icon: Brain, delay: "0s", duration: "6s", position: { left: "15%", top: "20%" } },
