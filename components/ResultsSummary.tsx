@@ -27,7 +27,7 @@ export default function ResultsSummary({
 
                 return (
                     <div key={index} className="border-b pb-6 border-gray-200 last:border-0">
-                        <h2 className="text-xl font-semibold text-gray-800 mb-3">
+                        <h2 className="text-base md:text-xl font-semibold text-gray-800 mb-3">
                             Q{index + 1}: {question}
                         </h2>
 
