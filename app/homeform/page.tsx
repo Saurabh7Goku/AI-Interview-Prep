@@ -1,33 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-    Briefcase,
-    User,
-    ChevronDown,
-    Sparkles,
-    ArrowRight,
-    Brain,
-    Zap,
-    Shield,
-    Code,
-    Database,
-    Palette,
-    MessageCircle,
-    TrendingUp,
-    Globe,
-    Smartphone,
-    Server,
-    Camera,
-    Star,
-    Target,
-    ListChecks,
-    Languages,
-    Tag,
-    CheckCircle,
-    Users,
-    Award
-} from "lucide-react";
+import { Briefcase, User, ChevronDown, Sparkles, ArrowRight, Brain, Zap, Shield, Code, Database, Palette, MessageCircle, TrendingUp, Globe, Smartphone, Server, Camera, Star, Target, ListChecks, Languages, Tag, CheckCircle, Users, Award } from "lucide-react";
 
 export default function HomeForm() {
     const router = useRouter();
