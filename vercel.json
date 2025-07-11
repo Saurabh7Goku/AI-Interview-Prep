@@ -1,12 +1,8 @@
 {
-  "crons": [
-    {
-      "path": "/api/cleanup",
-      "schedule": "0 0 * * *",
-      "method": "POST",
-      "headers": {
-        "Authorization": "Bearer ${CLEANUP_SECRET}"
+    "crons": [
+      {
+        "path": "/api/cleanup?secret=${CLEANUP_SECRET}",
+        "schedule": "0 0 * * *"
       }
-    }
-  ]
-}
+    ]
+  }
