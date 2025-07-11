@@ -4,7 +4,7 @@ import { getFirestore } from "firebase-admin/firestore";
 
 // Load service account credentials from environment variable or file
 const serviceAccount = JSON.parse(
-  process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT || "{}"
+  process.env.NEXT_PUBLIC_FIREBASE_ADMIN_SERVICE_ACCOUNT || "{}"
 );
 
 // Initialize Firebase Admin SDK
