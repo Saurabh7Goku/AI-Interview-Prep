@@ -1,10 +1,35 @@
-"use client"
-import { useState } from "react";
-import { Briefcase, Sparkles, ArrowRight, Star, Target, Brain, Award, MessageSquare, Clock, Shield } from "lucide-react";
+"use client";
+import { useState, useEffect } from "react";
+import { Briefcase, Sparkles, ArrowRight, Star, Target, Brain, Award, MessageSquare, Clock, Shield, LogIn, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { auth, signOut } from "@/firebase/firebase";
+import { useToast } from "@/components/ToastProvide";
 
 export default function Home() {
   const router = useRouter();
+  const { showToast } = useToast();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setIsAuthenticated(!!user);
+      if (!user) {
+        router.push("/auth");
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      showToast("✅ Logged out successfully!", "success");
+      router.push("/auth");
+    } catch (error) {
+      showToast("❌ Failed to log out.", "error");
+      console.error("Error logging out:", error);
+    }
+  };
 
   const features = [
     {
@@ -81,7 +106,6 @@ export default function Home() {
     }
   ];
 
-  // Duplicate testimonials for seamless loop
   const duplicatedTestimonials = [...testimonials, ...testimonials];
 
   return (
@@ -94,7 +118,7 @@ export default function Home() {
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-10 px-6 py-4">
+      <nav className="relative z-10 px-6 py-4 bg-white/80 backdrop-blur-sm border-b border-blue-100 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
@@ -102,12 +126,37 @@ export default function Home() {
             </div>
             <span className="text-xl font-bold text-gray-800">InterviewPrep AI</span>
           </div>
-          <button
-            onClick={() => router.push("/homeform")}
-            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl"
-          >
-            Get Started
-          </button>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => router.push("/history")}
+              className="px-6 py-2 bg-white/80 border border-blue-200 text-blue-600 font-semibold rounded-xl hover:bg-blue-50 transition-all duration-300"
+            >
+              View History
+            </button>
+            <button
+              onClick={() => router.push("/homeform")}
+              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              Get Started
+            </button>
+            {isAuthenticated ? (
+              <button
+                onClick={handleLogout}
+                className="px-6 py-2 bg-red-100 text-red-600 font-semibold rounded-xl hover:bg-red-200 transition-all duration-300 flex items-center space-x-2"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Log Out</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => router.push("/auth")}
+                className="px-6 py-2 bg-green-100 text-green-600 font-semibold rounded-xl hover:bg-green-200 transition-all duration-300 flex items-center space-x-2"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Log In</span>
+              </button>
+            )}
+          </div>
         </div>
       </nav>
 
@@ -118,17 +167,14 @@ export default function Home() {
             <Sparkles className="w-4 h-4 mr-2" />
             AI-Powered Interview Preparation
           </div>
-
           <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-6 leading-tight">
             Ace Your Next
             <span className="bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent"> Interview</span>
           </h1>
-
           <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
             Generate personalized interview questions tailored to your job profile and experience level.
             Prepare smarter, not harder, with our AI-powered platform.
           </p>
-
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
               onClick={() => router.push("/homeform")}
@@ -137,7 +183,6 @@ export default function Home() {
               <span>Start Preparing Now</span>
               <ArrowRight className="w-5 h-5" />
             </button>
-
             <button className="px-8 py-4 bg-white/80 backdrop-blur-sm text-gray-700 font-semibold rounded-2xl border-2 border-gray-200 hover:border-blue-300 transition-all duration-300 flex items-center space-x-2">
               <MessageSquare className="w-5 h-5" />
               <span>Watch Demo</span>
@@ -171,7 +216,6 @@ export default function Home() {
               Our intelligent platform adapts to your needs, providing the most relevant and challenging questions.
             </p>
           </div>
-
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
               <div key={index} className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-300 hover:scale-105">
@@ -193,10 +237,7 @@ export default function Home() {
             <h2 className="text-4xl font-bold text-gray-800 mb-6">Success Stories</h2>
             <p className="text-xl text-gray-600">See how others have succeeded with InterviewPrep AI</p>
           </div>
-
-          {/* Container with hidden overflow */}
           <div className="relative overflow-hidden">
-            {/* Moving container */}
             <div className="flex gap-6 animate-scroll">
               {duplicatedTestimonials.map((testimonial, index) => (
                 <div
@@ -216,31 +257,22 @@ export default function Home() {
                 </div>
               ))}
             </div>
-
-            {/* Enhanced gradient overlays for smooth fade effect */}
             <div className="absolute left-0 top-0 w-20 h-full bg-gradient-to-r from-blue-50 to-transparent pointer-events-none z-10"></div>
             <div className="absolute right-0 top-0 w-20 h-full bg-gradient-to-l from-blue-50 to-transparent pointer-events-none z-10"></div>
           </div>
         </div>
-
         <style jsx>{`
-    @keyframes scroll {
-      0% {
-        transform: translateX(0);
-      }
-      100% {
-        transform: translateX(-200%);
-      }
-    }
-    
-    .animate-scroll {
-      animation: scroll 30s linear infinite;
-    }
-    
-    .animate-scroll:hover {
-      animation-play-state: paused;
-    }
-  `}</style>
+          @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-200%); }
+          }
+          .animate-scroll {
+            animation: scroll 30s linear infinite;
+          }
+          .animate-scroll:hover {
+            animation-play-state: paused;
+          }
+        `}</style>
       </section>
 
       {/* CTA Section */}

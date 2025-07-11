@@ -1,21 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import ResultsSummary from "@/components/ResultsSummary";
-import {
-    ArrowLeft,
-    Trophy,
-    Target,
-    Award,
-    Download,
-    RotateCcw,
-    CheckCircle,
-    Star,
-    Briefcase,
-    TrendingUp,
-    TrendingDown,
-} from "lucide-react";
+import { auth, getInterviewHistory } from "@/firebase/firebase";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvide";
+import { ArrowLeft, Trophy, Target, Award, Download, RotateCcw, CheckCircle, Briefcase, TrendingUp, TrendingDown } from "lucide-react";
 
 interface Result {
     questions: string[];
@@ -27,7 +16,6 @@ interface Result {
 export default function ResultsPage() {
     const router = useRouter();
     const { showToast } = useToast();
-
     const [results, setResults] = useState<Result>({
         questions: [],
         answers: {},
@@ -35,48 +23,40 @@ export default function ResultsPage() {
         scores: {},
     });
 
-    // Load results only once on mount
     useEffect(() => {
-        try {
-            const storedQuestions = localStorage.getItem("questions");
-            const questions = storedQuestions
-                ? JSON.parse(storedQuestions)
-                : [];
+        const fetchResults = async () => {
+            const user = auth.currentUser;
+            if (!user) {
+                showToast("❌ Please sign in to view results.", "error");
+                router.push("/auth");
+                return;
+            }
 
-            const storedUserAnswers = localStorage.getItem("userAnswers");
-            const answers = storedUserAnswers ? JSON.parse(storedUserAnswers) : {};
-
-            const storedFeedbacks = localStorage.getItem("feedbacks");
-            const feedbacks = storedFeedbacks ? JSON.parse(storedFeedbacks) : {};
-
-            const storedScores = localStorage.getItem("scores");
-            const scores = storedScores ? JSON.parse(storedScores) : {};
-
-            // Only update state if data has changed
-            setResults((prev) => {
-                if (
-                    JSON.stringify(prev.questions) === JSON.stringify(questions) &&
-                    JSON.stringify(prev.answers) === JSON.stringify(answers) &&
-                    JSON.stringify(prev.feedbacks) === JSON.stringify(feedbacks) &&
-                    JSON.stringify(prev.scores) === JSON.stringify(scores)
-                ) {
-                    return prev; // No change needed
+            try {
+                const history = await getInterviewHistory(user.uid);
+                if (history.length > 0) {
+                    const latestInterview = history[history.length - 1];
+                    setResults({
+                        questions: latestInterview.questions || [],
+                        answers: latestInterview.answers || {},
+                        feedbacks: latestInterview.feedbacks || {},
+                        scores: latestInterview.scores || {},
+                    });
+                } else {
+                    showToast("⚠️ No interview results found.", "warning");
                 }
+            } catch (error) {
+                showToast("❌ Failed to load results.", "error");
+                console.error("Error loading results:", error);
+            }
+        };
 
-                return { questions, answers, feedbacks, scores };
-            });
-        } catch (error) {
-            showToast("❌ Failed to load results.", "error");
-            console.error("Error loading results:", error);
-        }
-    }, [showToast]); // Run only once on mount
+        fetchResults();
+    }, [router, showToast]);
 
     const avgScore =
         results.questions.length > 0
-            ? Object.values(results.scores).reduce(
-                (a, b) => a + b,
-                0
-            ) / results.questions.length
+            ? Object.values(results.scores).reduce((a, b) => a + b, 0) / results.questions.length
             : 0;
 
     const getScoreColor = (score: number) => {
@@ -87,34 +67,22 @@ export default function ResultsPage() {
 
     const getPerformanceLevel = (score: number) => {
         if (score >= 8)
-            return {
-                level: "Excellent",
-                icon: <Trophy className="w-5 h-5" />,
-                color: "text-green-600",
-            };
+            return { level: "Excellent", icon: <Trophy className="w-5 h-5" />, color: "text-green-600" };
         if (score >= 6)
-            return {
-                level: "Good",
-                icon: <Target className="w-5 h-5" />,
-                color: "text-yellow-600",
-            };
-        return {
-            level: "Needs Improvement",
-            icon: <Star className="w-5 h-5" />,
-            color: "text-red-600",
-        };
+            return { level: "Good", icon: <Target className="w-5 h-5" />, color: "text-yellow-600" };
+        return { level: "Needs Improvement", icon: <TrendingDown className="w-5 h-5" />, color: "text-red-600" };
     };
 
     const performance = getPerformanceLevel(avgScore);
 
-    const handleRetakeInterview = () => {
+    const handleRetakeInterview = async () => {
         try {
             localStorage.removeItem("questions");
             localStorage.removeItem("userAnswers");
             localStorage.removeItem("feedbacks");
             localStorage.removeItem("scores");
             localStorage.removeItem("currentQuestionIndex");
-            router.push("/");
+            router.push("/homeform");
         } catch (error) {
             showToast("❌ Failed to clear results.", "error");
             console.error("Error clearing results:", error);
@@ -153,12 +121,11 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
-            {/* Header */}
             <div className="bg-white/80 backdrop-blur-sm border-b border-blue-100 shadow-sm">
                 <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                         <button
-                            onClick={() => router.back()}
+                            onClick={() => router.push("/history")}
                             className="p-2 hover:bg-blue-50 rounded-xl transition-colors duration-200"
                             aria-label="Go back"
                         >
@@ -174,7 +141,6 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
                             </div>
                         </div>
                     </div>
-
                     <div className="flex items-center space-x-3">
                         <button
                             onClick={handleDownloadResults}
@@ -197,7 +163,6 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
             </div>
 
             <main className="max-w-6xl mx-auto px-6 py-8">
-                {/* Stats Cards */}
                 <div className="grid md:grid-cols-3 gap-6 mb-8">
                     <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-100 p-6">
                         <div className="text-center">
@@ -211,7 +176,6 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
                             <div className="text-sm text-gray-600">out of 10</div>
                         </div>
                     </div>
-
                     <div
                         className={`backdrop-blur-sm rounded-3xl shadow-xl border p-6 ${avgScore >= 8
                             ? "bg-green-50 border-green-200"
@@ -229,13 +193,7 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
                                         : "text-red-600"
                                     }`}
                             >
-                                {avgScore >= 8 ? (
-                                    <Trophy className="w-8 h-8" />
-                                ) : avgScore >= 6 ? (
-                                    <TrendingUp className="w-8 h-8" />
-                                ) : (
-                                    <TrendingDown className="w-8 h-8" />
-                                )}
+                                {performance.icon}
                             </div>
                             <h3 className="text-lg font-semibold text-gray-800 mb-2">Performance</h3>
                             <div className={`text-xl font-bold ${getScoreColor(avgScore)}`}>
@@ -243,7 +201,6 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
                             </div>
                         </div>
                     </div>
-
                     <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-100 p-6">
                         <div className="text-center">
                             <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -257,8 +214,6 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
                         </div>
                     </div>
                 </div>
-
-                {/* Detailed Feedback */}
                 <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-100 p-8 mb-8">
                     <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
                         <Briefcase className="w-6 h-6 mr-3 text-blue-600" />
@@ -271,8 +226,6 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
                         scores={results.scores}
                     />
                 </div>
-
-                {/* Action Buttons */}
                 <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
                     <button
                         onClick={handleRetakeInterview}
@@ -282,11 +235,11 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
                         <span>Take Another Interview</span>
                     </button>
                     <button
-                        onClick={() => router.push("/")}
+                        onClick={() => router.push("/history")}
                         className="flex items-center justify-center space-x-2 px-8 py-4 bg-white/80 backdrop-blur-sm text-gray-700 font-semibold rounded-2xl border-2 border-gray-200 hover:border-blue-300 transition-all duration-300"
                     >
                         <ArrowLeft className="w-5 h-5" />
-                        <span>Back to Home</span>
+                        <span>View History</span>
                     </button>
                 </div>
             </main>
