@@ -21,14 +21,18 @@ export async function generateQuestions(
   const topicsText = Array.isArray(focusTopics) ? focusTopics.join(", ") : focusTopics;
   const CompanyName = Array.isArray(targetCompany) ? targetCompany.join(", ") : targetCompany;
 
-  const prompt = `
-  Generate 10 ${interviewType} interview questions for the role of ${jobProfileName} at ${experienceLevel} level.
-  Focus on the following skills: ${skillsText}.
-  ${CompanyName ? `The questions should be suitable for interviewing at ${CompanyName}.` : ""}
-  ${topicsText ? `Include questions covering these topics: ${topicsText}.` : ""}
-  Write the questions in ${language}.
-  Include only the list of questions, one per line.
-  `.trim();
+  const prompt = [
+    `Generate 10 ${interviewType} interview questions for the role of ${jobProfileName} at ${experienceLevel} level.`,
+    `If question is of coding then add a tag "Coding Question" after the question.`,
+    `Focus on the following skills: ${skillsText}.`,
+    CompanyName && `The questions should be suitable for interviewing at ${CompanyName}.`,
+    topicsText && `Include questions covering these topics: ${topicsText}.`,
+    `Write the questions in ${language}.`,
+    `Include only the list of questions, one per line.`
+  ]
+  .filter(Boolean)
+  .join('\n');
+  
   
 
   const response = await fetch(GEMINI_API_URL, {
@@ -66,17 +70,23 @@ export async function evaluateAnswer(question: string, userAnswer: string) {
         throw new Error("Missing GEMINI_API_KEY environment variable");
     }
 
-    const isCodingQuestion = /Write.*code|Write.*program|write.*code|write.*program|Write.*SQL|write.*SQL|write.*sql|write.*Sql|Write.*Sql|Write.*sql|Sql.*code|SQL.*code|Provide.*code|provide.*code|implement|code.*for/i.test(question);
+    const isCodingQuestion = /(write|provide|implement|create).*(code|program|sql)|sql.*code|Coding Question\s*$)/i.test(question);
+    
     const prompt = `
-Evaluate this answer to the question "${question}":
-User Answer: "${userAnswer}"
-Ignore any meaningless words(can occurs due to transcript),
-Provide the response with the following format:
-Score: [Number from 0 to 10]
-Feedback: [Short feedback here]
-Ideal Answer: [Ideal answer here if theory question then keep it simple and short.]
-${isCodingQuestion ? "If the question requires writing code, evaluate the correctness, syntax, and efficiency of the code. Ensure the ideal answer includes a correct code example."
- : ""}`.trim();
+    Evaluate this answer to the question: "${question}"
+    User Answer: "${userAnswer}"
+    Ignore any meaningless words (can occur due to transcript).
+    
+    Provide the response strictly in the following format:
+    - Score: [Number from 0 to 10]
+    - Feedback: [Very short, one or two sentences, concise, clear, no repetition]
+    - Ideal Answer: [Very short, concise, no more than 2-3 sentences or a short code snippet if coding question]
+    
+    ${isCodingQuestion ? "If the question requires writing code, ensure the Ideal Answer includes a correct, short, efficient code example (no explanation, just the code)." : ""}
+    
+    **Keep your response concise and to the point.**
+    `.trim();
+    
 
     const response = await fetch(GEMINI_API_URL, {
         method: "POST",

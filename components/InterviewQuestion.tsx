@@ -14,7 +14,9 @@ export default function InterviewQuestion({
     total: number;
     onNext: (answer: string) => void;
 }) {
-    const isCodeQuestion = /write.*code|Write.*code|Write.*a|write.*a/i.test(question);
+
+    const isCodeQuestion = /(write|provide|implement|create).*(code|program|sql)|sql.*code|Coding Question\s*$)/i.test(question);//REGEX for filtering Coding Ques..
+
     const [codeAnswer, setCodeAnswer] = useState("");
 
     const { transcript, isListening, startListening, stopListening, resetTranscript } =

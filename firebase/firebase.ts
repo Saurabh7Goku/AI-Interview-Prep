@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, collection, addDoc, getDocs, query, where,} from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs, query, where,Timestamp} from "firebase/firestore";
 import { signOut, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 
 // Define the Interview interface to match the data structure
@@ -11,7 +11,7 @@ export interface Interview {
   answers: { [key: number]: string };
   feedbacks: { [key: number]: string };
   scores: { [key: number]: number };
-  timestamp: string;
+  timestamp: string | Timestamp;
 }
 
 const firebaseConfig = {
@@ -32,12 +32,13 @@ export async function saveInterview(userId: string, interviewData: {
   answers: { [key: number]: string };
   feedbacks: { [key: number]: string };
   scores: { [key: number]: number };
-  timestamp: string;
+  timestamp?: string;
 }) {
   try {
     const docRef = await addDoc(collection(db, "interviews"), {
       userId,
       ...interviewData,
+      createdAt: Timestamp.fromDate(new Date()),
       timestamp: interviewData.timestamp || new Date().toISOString(),
     });
     console.log("Interview saved with ID:", docRef.id);
@@ -59,6 +60,7 @@ export async function getInterviewHistory(userId: string): Promise<Interview[]> 
       answers: doc.data().answers || {},
       feedbacks: doc.data().feedbacks || {},
       scores: doc.data().scores || {},
+      createdAt: doc.data().createdAt ? (doc.data().createdAt instanceof Timestamp ? doc.data().createdAt.toDate().toISOString() : doc.data().createdAt) : "",
       timestamp: doc.data().timestamp || "",
     }));
     console.log("Fetched interviews:", interviews);
