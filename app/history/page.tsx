@@ -1,41 +1,43 @@
+
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth, getInterviewHistory } from "@/firebase/firebase";
+import { auth, getInterviewHistory, Interview } from "@/firebase/firebase";
 import { useToast } from "@/components/ToastProvide";
 import { ArrowLeft, Briefcase, Clock, Trophy } from "lucide-react";
 import ResultsSummary from "@/components/ResultsSummary";
-
-interface Interview {
-    id: string;
-    questions: string[];
-    answers: { [key: number]: string };
-    feedbacks: { [key: number]: string };
-    scores: { [key: number]: number };
-    timestamp: string;
-}
+import { Timestamp } from "firebase/firestore";
 
 export default function HistoryPage() {
     const router = useRouter();
     const { showToast } = useToast();
     const [history, setHistory] = useState<Interview[]>([]);
     const [selectedInterview, setSelectedInterview] = useState<Interview | null>(null);
+    const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
     useEffect(() => {
         const fetchHistory = async () => {
             const user = auth.currentUser;
+            console.log("History page user:", user ? `User ${user.uid} ` : "No user");
             if (!user) {
                 showToast("❌ Please sign in to view history.", "error");
                 router.push("/auth");
+                setIsLoadingAuth(false);
                 return;
             }
 
             try {
                 const interviews = await getInterviewHistory(user.uid);
-                setHistory(interviews as Interview[]);
+                console.log("Fetched interviews:", interviews);
+                setHistory(interviews);
+                if (interviews.length > 0 && !selectedInterview) {
+                    setSelectedInterview(interviews[interviews.length - 1]);
+                }
             } catch (error) {
                 showToast("❌ Failed to load interview history.", "error");
                 console.error("Error loading history:", error);
+            } finally {
+                setIsLoadingAuth(false);
             }
         };
 
@@ -46,6 +48,31 @@ export default function HistoryPage() {
         const values = Object.values(scores);
         return values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
     };
+
+    // Convert createdAt to Date object
+    const formatDate = (createdAt: string | Timestamp) => {
+        const date = typeof createdAt === "string" ? new Date(createdAt) : createdAt.toDate();
+        return date.toLocaleDateString();
+    };
+
+    const formatDateTime = (createdAt: string | Timestamp) => {
+        const date = typeof createdAt === "string" ? new Date(createdAt) : createdAt.toDate();
+        return date.toLocaleString();
+    };
+
+    if (isLoadingAuth) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
+                <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 p-8 max-w-md w-full mx-4 text-center animate-fade-in">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
+                        <Clock className="w-8 h-8 text-white animate-spin" />
+                    </div>
+                    <h2 className="text-xl font-semibold text-gray-800 mb-2">Loading...</h2>
+                    <p className="text-gray-600">Fetching your history</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
@@ -81,14 +108,15 @@ export default function HistoryPage() {
                                 <button
                                     key={interview.id}
                                     onClick={() => setSelectedInterview(interview)}
-                                    className={`w-full text-left p-4 rounded-xl transition-all duration-200
+                                    className={`w - full text - left p - 4 rounded - xl transition - all duration - 200
                     ${selectedInterview?.id === interview.id
                                             ? "bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 shadow-lg"
-                                            : "bg-slate-50 text-slate-700 hover:bg-slate-100 hover:shadow-md"}`}
+                                            : "bg-slate-50 text-slate-700 hover:bg-slate-100 hover:shadow-md"
+                                        } `}
                                 >
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-sm font-medium">
-                                            {new Date(interview.timestamp).toLocaleDateString()}
+                                            {formatDate(interview.createdAt)}
                                         </span>
                                         <span className="text-xs text-gray-600">
                                             Score: {getAvgScore(interview.scores).toFixed(1)}/10
@@ -106,7 +134,7 @@ export default function HistoryPage() {
                             <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-100 p-8">
                                 <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
                                     <Trophy className="w-6 h-6 mr-3 text-blue-600" />
-                                    Interview from {new Date(selectedInterview.timestamp).toLocaleString()}
+                                    Interview from {formatDateTime(selectedInterview.createdAt)}
                                 </h2>
                                 <ResultsSummary
                                     questions={selectedInterview.questions}

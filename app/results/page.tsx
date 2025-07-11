@@ -1,34 +1,35 @@
+
 "use client";
 import { useEffect, useState } from "react";
 import ResultsSummary from "@/components/ResultsSummary";
-import { auth, getInterviewHistory } from "@/firebase/firebase";
+import { auth, getInterviewHistory, Interview } from "@/firebase/firebase";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvide";
-import { ArrowLeft, Trophy, Target, Award, Download, RotateCcw, CheckCircle, Briefcase, TrendingUp, TrendingDown } from "lucide-react";
-
-interface Result {
-    questions: string[];
-    answers: { [key: number]: string };
-    feedbacks: { [key: number]: string };
-    scores: { [key: number]: number };
-}
+import { ArrowLeft, Trophy, Target, Award, Download, RotateCcw, CheckCircle, Briefcase, TrendingUp, TrendingDown, Clock } from "lucide-react";
+import { Timestamp } from "firebase/firestore";
 
 export default function ResultsPage() {
     const router = useRouter();
     const { showToast } = useToast();
-    const [results, setResults] = useState<Result>({
+    const [results, setResults] = useState<Interview>({
+        id: "",
+        userId: "",
         questions: [],
         answers: {},
         feedbacks: {},
         scores: {},
+        createdAt: "",
     });
+    const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
     useEffect(() => {
         const fetchResults = async () => {
             const user = auth.currentUser;
+            console.log("Results page user:", user ? `User ${user.uid}` : "No user");
             if (!user) {
                 showToast("❌ Please sign in to view results.", "error");
                 router.push("/auth");
+                setIsLoadingAuth(false);
                 return;
             }
 
@@ -36,18 +37,15 @@ export default function ResultsPage() {
                 const history = await getInterviewHistory(user.uid);
                 if (history.length > 0) {
                     const latestInterview = history[history.length - 1];
-                    setResults({
-                        questions: latestInterview.questions || [],
-                        answers: latestInterview.answers || {},
-                        feedbacks: latestInterview.feedbacks || {},
-                        scores: latestInterview.scores || {},
-                    });
+                    setResults(latestInterview);
                 } else {
                     showToast("⚠️ No interview results found.", "warning");
                 }
             } catch (error) {
                 showToast("❌ Failed to load results.", "error");
                 console.error("Error loading results:", error);
+            } finally {
+                setIsLoadingAuth(false);
             }
         };
 
@@ -75,6 +73,12 @@ export default function ResultsPage() {
 
     const performance = getPerformanceLevel(avgScore);
 
+    // Convert createdAt to Date object
+    const formatDate = (createdAt: string | Timestamp) => {
+        const date = typeof createdAt === "string" ? new Date(createdAt) : createdAt.toDate();
+        return date.toLocaleString();
+    };
+
     const handleRetakeInterview = async () => {
         try {
             localStorage.removeItem("questions");
@@ -92,6 +96,7 @@ export default function ResultsPage() {
     const handleDownloadResults = () => {
         try {
             const summary = `Interview Results Summary
+Date: ${formatDate(results.createdAt)}
 Average Score: ${avgScore.toFixed(1)}/10
 Performance Level: ${performance.level}
 Questions and Answers:
@@ -110,7 +115,7 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `interview-results-${new Date().toISOString().split("T")[0]}.txt`;
+            a.download = `interview-results-${formatDate(results.createdAt).split(",")[0].replace(/\//g, "-")}.txt`;
             a.click();
             URL.revokeObjectURL(url);
         } catch (error) {
@@ -118,6 +123,20 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
             console.error("Error downloading results:", error);
         }
     };
+
+    if (isLoadingAuth) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
+                <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 p-8 max-w-md w-full mx-4 text-center animate-fade-in">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
+                        <Clock className="w-8 h-8 text-white animate-spin" />
+                    </div>
+                    <h2 className="text-xl font-semibold text-gray-800 mb-2">Loading...</h2>
+                    <p className="text-gray-600">Fetching your results</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">

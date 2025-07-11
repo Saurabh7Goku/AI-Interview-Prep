@@ -70,7 +70,7 @@ export async function evaluateAnswer(question: string, userAnswer: string) {
         throw new Error("Missing GEMINI_API_KEY environment variable");
     }
 
-    const isCodingQuestion = /(write|provide|implement|create).*(code|program|sql)|sql.*code|Coding Question\s*$)/i.test(question);
+    const isCodingQuestion = /(write|provide|implement|create).*(code|program|sql)|sql.*code|Coding Question\s*$/i.test(question);
     
     const prompt = `
     Evaluate this answer to the question: "${question}"

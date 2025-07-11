@@ -4,7 +4,7 @@ import InterviewQuestion from "@/components/InterviewQuestion";
 import { useRouter } from "next/navigation";
 import { evaluateAnswer, getIdealAnswer } from "@/lib/gemini";
 import { auth, saveInterview } from "@/firebase/firebase";
-import { Briefcase, Clock, MessageSquare, User, ArrowLeft, CheckCircle, Camera, CameraOff, Menu, X, ChevronLeft } from "lucide-react";
+import { Briefcase, Clock, MessageSquare, User, ArrowLeft, CheckCircle, Camera, CameraOff, Menu, X } from "lucide-react";
 import WebcamPreview from "@/components/WebcamPreview";
 import { useToast } from "@/components/ToastProvide";
 
@@ -21,23 +21,28 @@ export default function InterviewPage() {
     const [isWebcamVisible, setIsWebcamVisible] = useState(false);
     const [isWebcamMinimized, setIsWebcamMinimized] = useState(true);
     const [webcamStream, setWebcamStream] = useState<MediaStream | null>(null);
+    const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
     useEffect(() => {
-        const user = auth.currentUser;
-        if (!user) {
-            showToast("❌ Please sign in to continue.", "error");
-            router.push("/auth");
-            return;
-        }
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            console.log("Auth state in InterviewPage:", user ? `User ${user.uid}` : "No user");
+            if (!user) {
+                showToast("❌ Please sign in to continue.", "error");
+                router.push("/auth");
+                setIsLoadingAuth(false);
+                return;
+            }
 
-        const storedQuestions = localStorage.getItem("questions");
-        if (storedQuestions) {
-            const parsed = JSON.parse(storedQuestions);
-            setQuestions(parsed.length > 10 ? parsed.slice(0, 10) : parsed);
-        }
-
-        const idx = localStorage.getItem("currentQuestionIndex");
-        if (idx) setCurrentIndex(parseInt(idx));
+            const storedQuestions = localStorage.getItem("questions");
+            if (storedQuestions) {
+                const parsed = JSON.parse(storedQuestions);
+                setQuestions(parsed.length > 5 ? parsed.slice(0, 5) : parsed);
+            }
+            const idx = localStorage.getItem("currentQuestionIndex");
+            if (idx) setCurrentIndex(parseInt(idx));
+            setIsLoadingAuth(false);
+        });
+        return () => unsubscribe();
     }, [router, showToast]);
 
     useEffect(() => {
@@ -55,6 +60,7 @@ export default function InterviewPage() {
 
     const handleNext = async (userAnswer: string) => {
         const user = auth.currentUser;
+        console.log("HandleNext user:", user ? `User ${user.uid}` : "No user");
         if (!user) {
             showToast("❌ Authentication required.", "error");
             router.push("/auth");
@@ -116,7 +122,6 @@ export default function InterviewPage() {
                     answers: updatedUserAnswers,
                     feedbacks,
                     scores,
-                    timestamp: new Date().toISOString(),
                 });
                 showToast("✅ Interview saved successfully!", "success");
                 router.push("/results");
@@ -166,6 +171,20 @@ export default function InterviewPage() {
     const toggleWebcamSize = () => {
         setIsWebcamMinimized(!isWebcamMinimized);
     };
+
+    if (isLoadingAuth) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
+                <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 p-8 max-w-md w-full mx-4 text-center animate-fade-in">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
+                        <Clock className="w-8 h-8 text-white animate-spin" />
+                    </div>
+                    <h2 className="text-xl font-semibold text-gray-800 mb-2">Loading...</h2>
+                    <p className="text-gray-600">Checking authentication status</p>
+                </div>
+            </div>
+        );
+    }
 
     if (questions.length === 0) {
         return (
@@ -270,7 +289,7 @@ export default function InterviewPage() {
                                                     ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
                                                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:shadow-md'}`}
                                         >
-                                            <ChevronLeft className="w-4 h-4" />
+                                            <ArrowLeft className="w-4 h-4" />
                                             <span>Previous</span>
                                         </button>
                                         <div className="text-center">
