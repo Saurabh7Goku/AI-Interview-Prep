@@ -87,7 +87,6 @@ export async function evaluateAnswer(question: string, userAnswer: string) {
     **Keep your response concise and to the point.**
     `.trim();
     
-
     const response = await fetch(GEMINI_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
