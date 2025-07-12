@@ -13,7 +13,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     const pathname = usePathname();
 
     const sidebarItems = [
-        { name: "Dashboard", icon: Home, path: "/" },
+        { name: "Dashboard", icon: Home, path: "/dashboard" },
         { name: "ATS Scan", icon: FileText, path: "/ats-scan" },
         { name: "Job Finder", icon: Search, path: "/job-finder" },
         { name: "Mock Interview", icon: MessageCircle, path: "/mock-interview" },

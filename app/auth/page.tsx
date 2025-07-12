@@ -19,7 +19,7 @@ export default function AuthPage() {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
                 showToast("✅ Successfully signed in!", "success");
-                router.push("/");
+                router.push("/history");
             }
         });
         return () => unsubscribe();
@@ -53,12 +53,12 @@ export default function AuthPage() {
                 }
                 await createUserWithEmailAndPassword(auth, email, password);
                 showToast("✅ Account created successfully!", "success");
-                router.push("/");
+                router.push("/history");
             } else {
                 try {
                     await signInWithEmailAndPassword(auth, email, password);
                     showToast("✅ Signed in successfully!", "success");
-                    router.push("/");
+                    router.push("/history");
                 } catch (error: any) {
                     if (error.code === "auth/user-not-found") {
                         setError("No account found with this email.");

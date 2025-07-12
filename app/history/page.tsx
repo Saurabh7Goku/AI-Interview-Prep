@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth, getInterviewHistory, Interview } from "@/firebase/firebase";
 import { useToast } from "@/components/ToastProvide";
+import Sidebar from "@/components/Sidebar";
 import {
     Home,
     FileText,
@@ -12,14 +13,11 @@ import {
     Clock,
     Trophy,
     Calendar,
-    TrendingUp,
     User,
     ChevronRight,
     Menu,
     X,
-    Filter,
     Star,
-    Award,
     Target,
     Zap
 } from "lucide-react";
@@ -141,42 +139,7 @@ export default function HistoryPage() {
             {/* Background Grid Pattern */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
 
-            {/* Sidebar */}
-            <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-800/95 backdrop-blur-xl border-r border-gray-700/50 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0`}>
-                <div className="flex items-center justify-between h-16 px-6 bg-gray-900/90 border-b border-gray-700/50">
-                    <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                            <span className="text-white font-bold text-sm">IP</span>
-                        </div>
-                        <span className="text-white font-bold text-lg">aiInterPrep</span>
-                    </div>
-                    <button
-                        onClick={() => setSidebarOpen(false)}
-                        className="md:hidden text-gray-400 hover:text-white transition-colors"
-                    >
-                        <X className="w-6 h-6" />
-                    </button>
-                </div>
-
-                <nav className="mt-8">
-                    <div className="px-4 mb-4">
-                        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Main Menu</h3>
-                    </div>
-                    {sidebarItems.map((item) => (
-                        <button
-                            key={item.name}
-                            onClick={() => router.push(item.path)}
-                            className={`w-full flex items-center px-6 py-3 text-left transition-all duration-200 ${item.active
-                                ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white border-r-2 border-blue-500 shadow-lg'
-                                : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-                                }`}
-                        >
-                            <item.icon className="w-5 h-5 mr-3" />
-                            {item.name}
-                        </button>
-                    ))}
-                </nav>
-            </div>
+            <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
@@ -273,8 +236,8 @@ export default function HistoryPage() {
                                             {/* Score Display */}
                                             <div className="flex items-center justify-between mb-4 p-3 bg-gray-700/30 rounded-xl border border-gray-600/30">
                                                 <div className="flex items-center space-x-3">
-                                                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${scoreGradient} flex items-center justify-center shadow-lg`}>
-                                                        <span className="text-white font-bold text-lg">{avgScore.toFixed(1)}</span>
+                                                    <div className={`w-8 h-8 md:w-12 md:h-12 rounded-xl bg-gradient-to-br ${scoreGradient} flex items-center justify-center shadow-lg`}>
+                                                        <span className="text-white font-bold text-xs md:text-lg">{avgScore.toFixed(1)}</span>
                                                     </div>
                                                     <div>
                                                         <div className="text-gray-300 font-semibold">Overall Score</div>

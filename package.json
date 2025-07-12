@@ -20,6 +20,7 @@
     "@uiw/react-codemirror": "^4.23.14",
     "autoprefixer": "^10.4.16",
     "codemirror": "^6.0.2",
+    "date-fns": "^4.1.0",
     "firebase": "^11.10.0",
     "firebase-admin": "^13.4.0",
     "highlight.js": "^11.11.1",
@@ -29,6 +30,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
+    "recharts": "^3.1.0",
     "rehype-highlight": "^7.0.2",
     "remark-gfm": "^4.0.1"
   },

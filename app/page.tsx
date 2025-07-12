@@ -1,39 +1,17 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Briefcase, Sparkles, ArrowRight, Star, Target, Brain, Award, MessageSquare, Clock, Shield, LogIn, LogOut, History, X, Menu } from "lucide-react";
+import { useState } from "react";
+import { Briefcase, Sparkles, ArrowRight, Star, Target, Brain, Award, MessageSquare, History, X, Menu, Shield, LogIn, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { auth, signOut } from "@/firebase/firebase";
 import { useToast } from "@/components/ToastProvide";
 
 export default function Home() {
   const router = useRouter();
   const { showToast } = useToast();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setIsAuthenticated(!!user);
-      if (!user) {
-        router.push("/auth");
-      }
-    });
-    return () => unsubscribe();
-  }, [router]);
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      showToast("✅ Logged out successfully!", "success");
-      router.push("/auth");
-    } catch (error) {
-      showToast("❌ Failed to log out.", "error");
-      console.error("Error logging out:", error);
-    }
-  };
 
   const handleNavigation = (path: string) => {
     setIsSidebarOpen(false);
+    router.push(path);
   };
 
   const features = [
@@ -114,13 +92,9 @@ export default function Home() {
   const duplicatedTestimonials = [...testimonials, ...testimonials];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
+    <div className="min-h-screen bg-gradient-to-br from-[#ADBBD4] via-[#DDD3E8] to-[#8697C4]">
       {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-20 left-20 w-32 h-32 bg-blue-400 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-20 w-40 h-40 bg-blue-600 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-blue-300 rounded-full blur-2xl"></div>
-      </div>
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
 
       {/* Sidebar Overlay */}
       {isSidebarOpen && (
@@ -131,8 +105,7 @@ export default function Home() {
       )}
 
       {/* Mobile Sidebar */}
-      <div className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 md:hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}>
+      <div className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 md:hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6">
           {/* Sidebar Header */}
           <div className="flex items-center justify-between mb-8">
@@ -160,8 +133,6 @@ export default function Home() {
                 localStorage.removeItem("feedbacks");
                 localStorage.removeItem("scores");
                 localStorage.removeItem("currentQuestionIndex");
-
-                // Then navigate to form
                 router.push("/homeform");
               }}
               className="w-full flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
@@ -169,34 +140,20 @@ export default function Home() {
               <Sparkles className="w-5 h-5" />
               <span>Get Started</span>
             </button>
-
             <button
-              onClick={() => router.push("/history")}
+              onClick={() => handleNavigation("/history")}
               className="w-full flex items-center space-x-3 px-4 py-3 bg-blue-50 text-blue-600 font-semibold rounded-xl hover:bg-blue-100 transition-all duration-300"
             >
               <History className="w-5 h-5" />
               <span>View History</span>
             </button>
-
-            <div className="border-t border-gray-200 pt-4 mt-6">
-              {isAuthenticated ? (
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center space-x-3 px-4 py-3 bg-red-50 text-red-600 font-semibold rounded-xl hover:bg-red-100 transition-all duration-300"
-                >
-                  <LogOut className="w-5 h-5" />
-                  <span>Log Out</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => handleNavigation("/auth")}
-                  className="w-full flex items-center space-x-3 px-4 py-3 bg-green-50 text-green-600 font-semibold rounded-xl hover:bg-green-100 transition-all duration-300"
-                >
-                  <LogIn className="w-5 h-5" />
-                  <span>Log In</span>
-                </button>
-              )}
-            </div>
+            <button
+              onClick={() => handleNavigation("/auth")}
+              className="w-full flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
+            >
+              <LogIn className="w-5 h-5" />
+              <span>Sign Up</span>
+            </button>
           </nav>
 
           {/* Sidebar Footer */}
@@ -210,13 +167,13 @@ export default function Home() {
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-10 px-4 sm:px-6 py-4 bg-white/80 backdrop-blur-sm border-b border-blue-100 shadow-sm">
+      <nav className="relative z-10 px-4 sm:px-6 py-4 bg-transparent backdrop-blur-sm border-b border-blue-100 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
               <Briefcase className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
             </div>
-            <span className="text-lg sm:text-xl font-bold text-gray-800">
+            <span className="text-lg md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
               InterviewPrep AI
             </span>
           </div>
@@ -224,7 +181,7 @@ export default function Home() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
             <button
-              onClick={() => router.push("/history")}
+              onClick={() => handleNavigation("/history")}
               className="px-6 py-2 bg-white/80 border border-blue-200 text-blue-600 font-semibold rounded-xl hover:bg-blue-50 transition-all duration-300"
             >
               View History
@@ -237,31 +194,19 @@ export default function Home() {
                 localStorage.removeItem("feedbacks");
                 localStorage.removeItem("scores");
                 localStorage.removeItem("currentQuestionIndex");
-
-                // Then navigate to form
                 router.push("/homeform");
               }}
               className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               Get Started
             </button>
-            {isAuthenticated ? (
-              <button
-                onClick={handleLogout}
-                className="px-6 py-2 bg-red-100 text-red-600 font-semibold rounded-xl hover:bg-red-200 transition-all duration-300 flex items-center space-x-2"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Log Out</span>
-              </button>
-            ) : (
-              <button
-                onClick={() => handleNavigation("/auth")}
-                className="px-6 py-2 bg-green-100 text-green-600 font-semibold rounded-xl hover:bg-green-200 transition-all duration-300 flex items-center space-x-2"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Log In</span>
-              </button>
-            )}
+            <button
+              onClick={() => handleNavigation("/auth")}
+              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center space-x-2"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Sign Up</span>
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -301,7 +246,6 @@ export default function Home() {
                 localStorage.removeItem("scores");
                 localStorage.removeItem("currentQuestionIndex");
                 showToast("✅ Local storage cleared!", "success");
-                // Then navigate to form
                 router.push("/homeform");
               }}
               className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center space-x-2"
@@ -410,7 +354,7 @@ export default function Home() {
               Join thousands of successful candidates who prepared with InterviewPrep AI
             </p>
             <button
-              onClick={() => router.push("/homeform")}
+              onClick={() => handleNavigation("/homeform")}
               className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center space-x-2 mx-auto"
             >
               <Sparkles className="w-5 h-5" />
@@ -438,6 +382,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </div >
+    </div>
   );
 }
