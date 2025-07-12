@@ -17,7 +17,11 @@ import {
     ChevronRight,
     Menu,
     X,
-    Filter
+    Filter,
+    Star,
+    Award,
+    Target,
+    Zap
 } from "lucide-react";
 import ResultsSummary from "@/components/ResultsSummary";
 import { Timestamp } from "firebase/firestore";
@@ -76,15 +80,21 @@ export default function HistoryPage() {
     };
 
     const getScoreColor = (score: number) => {
-        if (score >= 8) return "bg-green-500";
-        if (score >= 6) return "bg-orange-500";
-        return "bg-red-500";
+        if (score >= 8) return "from-emerald-500 to-green-500";
+        if (score >= 6) return "from-amber-500 to-orange-500";
+        return "from-red-500 to-rose-500";
     };
 
     const getScoreLabel = (score: number) => {
         if (score >= 8) return "Excellent";
         if (score >= 6) return "Average";
         return "Poor";
+    };
+
+    const getScoreIcon = (score: number) => {
+        if (score >= 8) return Trophy;
+        if (score >= 6) return Star;
+        return Target;
     };
 
     const formatDate = (createdAt: string | Timestamp) => {
@@ -114,29 +124,35 @@ export default function HistoryPage() {
 
     if (isLoadingAuth) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="min-h-screen bg-gray-900 flex items-center justify-center">
                 <div className="text-center">
-                    <Clock className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-                    <p className="text-gray-600">Loading your history...</p>
+                    <div className="relative">
+                        <div className="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+                        <Clock className="w-8 h-8 text-blue-500 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+                    </div>
+                    <p className="text-gray-400 text-lg">Loading your history...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="min-h-screen bg-gray-900 flex relative">
+            {/* Background Grid Pattern */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
+
             {/* Sidebar */}
-            <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0`}>
-                <div className="flex items-center justify-between h-16 px-6 bg-gray-800">
+            <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-800/95 backdrop-blur-xl border-r border-gray-700/50 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0`}>
+                <div className="flex items-center justify-between h-16 px-6 bg-gray-900/90 border-b border-gray-700/50">
                     <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                             <span className="text-white font-bold text-sm">IP</span>
                         </div>
                         <span className="text-white font-bold text-lg">aiInterPrep</span>
                     </div>
                     <button
                         onClick={() => setSidebarOpen(false)}
-                        className="md:hidden text-gray-400 hover:text-white"
+                        className="md:hidden text-gray-400 hover:text-white transition-colors"
                     >
                         <X className="w-6 h-6" />
                     </button>
@@ -150,9 +166,9 @@ export default function HistoryPage() {
                         <button
                             key={item.name}
                             onClick={() => router.push(item.path)}
-                            className={`w-full flex items-center px-6 py-3 text-left transition-colors ${item.active
-                                ? 'bg-gray-800 text-white border-r-2 border-blue-600'
-                                : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                            className={`w-full flex items-center px-6 py-3 text-left transition-all duration-200 ${item.active
+                                ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white border-r-2 border-blue-500 shadow-lg'
+                                : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
                                 }`}
                         >
                             <item.icon className="w-5 h-5 mr-3" />
@@ -165,22 +181,24 @@ export default function HistoryPage() {
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Header */}
-                <header className="bg-white shadow-sm border-b border-gray-200">
+                <header className="bg-gray-800/80 backdrop-blur-xl shadow-lg border-b border-gray-700/50">
                     <div className="flex items-center justify-between px-4 py-4">
                         <div className="flex items-center space-x-4">
                             <button
                                 onClick={() => setSidebarOpen(true)}
-                                className="md:hidden text-gray-600 hover:text-gray-900"
+                                className="md:hidden text-gray-400 hover:text-white transition-colors"
                             >
                                 <Menu className="w-5 h-5" />
                             </button>
                             <div>
-                                <h1 className="text-base md:text-2xl font-semibold text-gray-900">History</h1>
-                                <p className="hidden md:block text-gray-500 text-sm">Showing your all histories with a clear view.</p>
+                                <h1 className="text-base md:text-2xl font-bold text-white">Interview History</h1>
+                                <p className="hidden md:block text-gray-400 text-sm">Review your interview performance and track your progress</p>
                             </div>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                <User className="w-4 h-4 text-white" />
+                            </div>
                         </div>
                     </div>
                 </header>
@@ -189,111 +207,111 @@ export default function HistoryPage() {
                 <main className="flex-1 overflow-auto p-6">
                     {history.length === 0 ? (
                         <div className="text-center py-12">
-                            <History className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-500">No interviews yet</p>
-                            <p className="text-sm text-gray-400 mt-1">Complete your first interview to see it here</p>
+                            <div className="w-32 h-32 bg-gray-800/50 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-gray-700/50">
+                                <History className="w-16 h-16 text-gray-600" />
+                            </div>
+                            <p className="text-gray-300 text-xl font-semibold">No interviews yet</p>
+                            <p className="text-gray-500 mt-2">Complete your first interview to see it here</p>
+                            <button
+                                onClick={() => router.push("/mock-interview")}
+                                className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                            >
+                                Start Interview
+                            </button>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                             {history.map((interview) => {
                                 const avgScore = getAvgScore(interview.scores);
                                 const scoreLabel = getScoreLabel(avgScore);
-                                const scoreColor = getScoreColor(avgScore);
+                                const scoreGradient = getScoreColor(avgScore);
                                 const isSelected = selectedInterview?.id === interview.id;
 
                                 return (
                                     <div
                                         key={interview.id}
-                                        className={`group relative bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 ${isSelected ? 'ring-2 ring-blue-500 shadow-blue-100' : ''
+                                        className={`group relative bg-gray-800/50 backdrop-blur-xl rounded-2xl overflow-hidden border transition-all duration-300 cursor-pointer transform hover:-translate-y-2 hover:shadow-2xl ${isSelected
+                                            ? 'ring-2 ring-blue-500/50 shadow-blue-500/20 shadow-2xl border-blue-500/30'
+                                            : 'border-gray-700/50 hover:border-gray-600/50 hover:bg-gray-800/70'
                                             }`}
                                         onClick={() => setSelectedInterview(interview)}
                                     >
                                         {/* Header with gradient background */}
-                                        <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
-                                            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
-                                            <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/10 rounded-full translate-y-6 -translate-x-6"></div>
+                                        <div className="relative bg-gradient-to-br from-blue-600/20 to-purple-600/20 p-4 border-b border-gray-700/50">
+                                            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full -translate-y-10 translate-x-10"></div>
+                                            <div className="absolute bottom-0 left-0 w-12 h-12 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full translate-y-6 -translate-x-6"></div>
 
                                             <div className="relative z-10">
-                                                <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-start justify-between mb-4">
                                                     <div className="flex items-center space-x-3">
-                                                        <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                                                            <User className="w-6 h-6 text-white" />
+                                                        <div className="flex-1">
+                                                            <h3 className="font-bold text-lg text-white leading-tight">{interview.interviewRole}</h3>
+                                                            <p className="text-blue-300 text-sm font-medium">{interview.interviewType} Interview</p>
                                                         </div>
-                                                        <div>
-                                                            <h3 className="font-bold text-lg leading-tight">{interview.interviewRole}</h3>
-                                                            <p className="text-blue-100 text-sm font-medium">{interview.interviewType} Interview</p>
-                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2">
+
+                                                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
                                                     </div>
                                                 </div>
 
-                                                {/* Performance Badge */}
-                                                <div className="flex justify-between items-center">
-                                                    <div className="bg-transparent rounded-xl p-1">
-                                                        <div className="flex items-center space-x-2 text-gray-600 mb-1">
-                                                            <Calendar className="w-4 h-4 text-white" />
-                                                            <span className="text-xs font-medium text-white">Date</span>
-                                                        </div>
-                                                        <div className="text-sm font-semibold text-white">{formatDate(interview.createdAt)}</div>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2 text-gray-400">
+                                                        <Calendar className="w-4 h-4" />
+                                                        <span className="text-sm font-medium">{formatDate(interview.createdAt)}</span>
                                                     </div>
-                                                    <ChevronRight className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" />
+                                                    <div className="flex items-center space-x-2 text-gray-400">
+                                                        <Clock className="w-4 h-4" />
+                                                        <span className="text-sm font-medium">{formatTime(interview.createdAt)}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
                                         {/* Content */}
-                                        <div className="p-3 md:p-6 ">
-                                            <div className="flex items-center justify-between border-t border-gray-100">
-                                                <div className="flex items-center space-x-2 text-gray-500">
-                                                    <Clock className="w-4 h-4" />
-                                                    <span className="text-sm font-medium">{formatTime(interview.createdAt)}</span>
-                                                </div>
-
-                                                <div className="flex items-center space-x-2">
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${scoreColor} text-white shadow-lg`}>
-                                                        {scoreLabel}
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            {/* Statistics Grid */}
-                                            <div className="grid grid-cols-2 gap-4 mb-4">
-                                                <div className="bg-gray-50 rounded-xl p-1">
-                                                    <div className="flex items-center space-x-2 text-gray-600 mb-1">
-                                                        <TrendingUp className="w-4 h-4" />
-                                                        <span className="text-sm font-semibold text-gray-700">Questions</span>
+                                        <div className="p-4">
+                                            {/* Score Display */}
+                                            <div className="flex items-center justify-between mb-4 p-3 bg-gray-700/30 rounded-xl border border-gray-600/30">
+                                                <div className="flex items-center space-x-3">
+                                                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${scoreGradient} flex items-center justify-center shadow-lg`}>
+                                                        <span className="text-white font-bold text-lg">{avgScore.toFixed(1)}</span>
                                                     </div>
-                                                    <div className="text-lg font-bold text-gray-900">{interview.questions.length}</div>
+                                                    <div>
+                                                        <div className="text-gray-300 font-semibold">Overall Score</div>
+                                                        <div className={`text-sm font-bold ${avgScore >= 8 ? 'text-green-400' :
+                                                            avgScore >= 6 ? 'text-orange-400' : 'text-red-400'
+                                                            }`}>
+                                                            {scoreLabel}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <div className="text-2xl font-bold">{avgScore.toFixed(1)}</div>
-                                                    <div className="text-xs font-bold text-blue-400">Score</div>
+                                                    <div className={`text-sm md:text-xl text-white`}>
+                                                        {avgScore.toFixed(1)}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">/ 10</div>
                                                 </div>
                                             </div>
 
                                             {/* Skills Section */}
                                             {interview.skills && interview.skills.length > 0 && (
-                                                <div className="mb-4">
-                                                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Skills Assessed</h4>
+                                                <div>
+                                                    <h4 className="text-sm font-semibold text-gray-300 mb-2 flex items-center">
+                                                        <Zap className="w-4 h-4 mr-1 text-yellow-400" />
+                                                        Skills Assessed
+                                                    </h4>
                                                     <div className="flex flex-wrap gap-1">
                                                         {interview.skills.split(',').slice(0, 3).map((skill, index) => (
-                                                            <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium">
+                                                            <span key={index} className="px-1 py-1 bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-blue-300 rounded-lg text-xs border border-blue-500/30">
                                                                 {skill.trim()}
                                                             </span>
                                                         ))}
-                                                        {interview.skills.split(',').length > 3 && (
-                                                            <span className="px-2 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs">
-                                                                +{interview.skills.split(',').length - 3} more
-                                                            </span>
-                                                        )}
                                                     </div>
-
                                                 </div>
                                             )}
-
                                         </div>
-
                                         {/* Hover effect overlay */}
-                                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"></div>
                                     </div>
                                 );
                             })}
@@ -302,22 +320,22 @@ export default function HistoryPage() {
                 </main>
             </div>
 
-            {/* Interview Details Modal/Panel */}
+            {/* Detailed Analysis Modal/Panel */}
             {selectedInterview && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 md:hidden">
-                    <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="p-6 border-b border-gray-200">
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:hidden">
+                    <div className="bg-gray-800/95 backdrop-blur-xl rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-gray-700/50 shadow-2xl">
+                        <div className="p-6 border-b border-gray-700/50 bg-gray-900/50">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-xl font-bold text-gray-900">Interview Details</h2>
+                                <h2 className="text-xl font-bold text-white">Detailed Interview Analysis</h2>
                                 <button
                                     onClick={() => setSelectedInterview(null)}
-                                    className="text-gray-400 hover:text-gray-600"
+                                    className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-700/50 rounded-lg"
                                 >
                                     <X className="w-6 h-6" />
                                 </button>
                             </div>
                         </div>
-                        <div className="p-6">
+                        <div className="p-6 text-white">
                             <ResultsSummary
                                 questions={selectedInterview.questions}
                                 answers={selectedInterview.answers}
@@ -333,19 +351,19 @@ export default function HistoryPage() {
 
             {/* Desktop Details Panel */}
             {selectedInterview && !isMobile && (
-                <div className="hidden md:block fixed right-0 top-0 h-full w-1/2 bg-white shadow-xl z-40 overflow-y-auto">
-                    <div className="p-6 border-b border-gray-200">
+                <div className="hidden md:block fixed right-0 top-0 h-full w-1/2 bg-gray-800/95 backdrop-blur-xl shadow-2xl z-40 overflow-y-auto border-l border-gray-700/50">
+                    <div className="p-6 border-b border-gray-700/50 bg-gray-900/50">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-xl font-bold text-gray-900">Interview Details</h2>
+                            <h2 className="text-xl font-bold text-white">Detailed Interview Analysis</h2>
                             <button
                                 onClick={() => setSelectedInterview(null)}
-                                className="text-gray-400 hover:text-gray-600"
+                                className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-700/50 rounded-lg"
                             >
                                 <X className="w-6 h-6" />
                             </button>
                         </div>
                     </div>
-                    <div className="p-6">
+                    <div className="p-6 text-white">
                         <ResultsSummary
                             questions={selectedInterview.questions}
                             answers={selectedInterview.answers}
@@ -361,7 +379,7 @@ export default function HistoryPage() {
             {/* Mobile Sidebar Overlay */}
             {sidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
                     onClick={() => setSidebarOpen(false)}
                 />
             )}
