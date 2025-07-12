@@ -44,38 +44,37 @@ const Dashboard = () => {
         return () => unsubscribe();
     }, [router, showToast]);
 
-    const getFilteredData = (interviews: any[], selectedRange: string) => {
+    const getFilteredData = (interviews: Interview[], selectedRange: string) => {
         const now = new Date();
-        const grouped: Record<string, Interview[]> = {};
+        let filtered: Interview[] = [];
 
-        let filtered = [];
-        if (selectedRange === 'Today') {
+        if (selectedRange === 'today') {
             filtered = interviews.filter((interview) => {
                 const date = typeof interview.createdAt === 'string' ? new Date(interview.createdAt) : interview.createdAt.toDate();
                 return isSameDay(date, now);
             });
 
-            filtered.forEach((interview) => {
-                const date = typeof interview.createdAt === 'string' ? new Date(interview.createdAt) : interview.createdAt.toDate();
-                const hour = format(date, 'ha'); // e.g., "10AM"
-                if (!grouped[hour]) grouped[hour] = [];
-                grouped[hour].push(interview);
-            });
-
-            return Object.entries(grouped).map(([hour, interviews]) => ({
-                label: hour,
-                value: getAverage(interviews)
-            }));
-
+            // Sort by time and map to { label: "hh:mm", value: avgScore }
+            return filtered
+                .sort((a, b) => {
+                    const dateA = typeof a.createdAt === 'string' ? new Date(a.createdAt) : a.createdAt.toDate();
+                    const dateB = typeof b.createdAt === 'string' ? new Date(b.createdAt) : b.createdAt.toDate();
+                    return dateA.getTime() - dateB.getTime();
+                })
+                .map((interview) => {
+                    const date = typeof interview.createdAt === 'string' ? new Date(interview.createdAt) : interview.createdAt.toDate();
+                    const time = format(date, 'HH:mm'); // e.g., "14:30"
+                    const scores = Object.values(interview.scores ?? {});
+                    const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+                    return { label: time, value: parseFloat(avgScore.toFixed(1)) };
+                });
         } else if (selectedRange === 'Last 7 Days') {
             filtered = interviews.filter((interview) => {
                 const date = typeof interview.createdAt === 'string' ? new Date(interview.createdAt) : interview.createdAt.toDate();
                 return isWithinInterval(date, { start: subDays(now, 6), end: now });
             });
 
-            // Group by weekday name (Mon, Tue...)
             const grouped: Record<string, Interview[]> = {};
-
             filtered.forEach((interview) => {
                 const date = typeof interview.createdAt === 'string' ? new Date(interview.createdAt) : interview.createdAt.toDate();
                 const day = format(date, 'EEE'); // e.g., "Mon"
@@ -87,16 +86,13 @@ const Dashboard = () => {
                 label: day,
                 value: getAverage(interviews)
             }));
-
         } else if (selectedRange === 'Last 30 Days') {
             filtered = interviews.filter((interview) => {
                 const date = typeof interview.createdAt === 'string' ? new Date(interview.createdAt) : interview.createdAt.toDate();
                 return isWithinInterval(date, { start: subDays(now, 29), end: now });
             });
 
-            // Group by day number (e.g., "Jul 10")
-
-
+            const grouped: Record<string, Interview[]> = {};
             filtered.forEach((interview) => {
                 const date = typeof interview.createdAt === 'string' ? new Date(interview.createdAt) : interview.createdAt.toDate();
                 const day = format(date, 'MMM d'); // e.g., "Jul 10"
@@ -108,9 +104,7 @@ const Dashboard = () => {
                 label: day,
                 value: getAverage(interviews)
             }));
-
-        } else { // All Time
-            // Group by month as before
+        } else {
             return getMonthlyScores(interviews);
         }
     };
@@ -131,8 +125,6 @@ const Dashboard = () => {
     // Process data for charts
     const getMonthlyScores = (interviews: Interview[]) => {
         const currentYear = new Date().getFullYear();
-
-        // Extract unique months from interview dates in the current year
         const monthNumbers = Array.from(
             new Set(
                 interviews
@@ -144,19 +136,16 @@ const Dashboard = () => {
                     })
                     .filter((monthNum): monthNum is number => monthNum !== null)
             )
-        ).sort((a, b) => a - b); // sort chronologically
+        ).sort((a, b) => a - b);
 
-        // Fallback if no interviews found (to show current month)
         if (monthNumbers.length === 0) {
             monthNumbers.push(new Date().getMonth());
         }
 
-        // Convert month numbers to short names
         const monthNames = monthNumbers.map(num =>
             new Date(currentYear, num).toLocaleString('default', { month: 'short' })
         );
 
-        // Calculate average scores
         const monthlyScores = monthNumbers.map((monthNum, idx) => {
             const monthInterviews = interviews.filter((interview) => {
                 const date = typeof interview.createdAt === 'string'
@@ -172,31 +161,37 @@ const Dashboard = () => {
                 }, 0) / monthInterviews.length
                 : 0;
 
-            return { month: monthNames[idx], value: avgScore.toFixed(1) };
+            return { label: monthNames[idx], value: parseFloat(avgScore.toFixed(1)) };
         });
 
         return monthlyScores;
     };
 
-
     const getScoreDistribution = (interviews: Interview[]) => {
-        const categories = ['Technical', 'Behavioral', 'Communication', 'Problem-Solving'];
-        const distribution = categories.map((category, index) => {
-            const categoryScores = interviews
-                .filter((interview) => interview.skills?.toLowerCase().includes(category.toLowerCase()))
-                .map((interview) => {
-                    const scores = Object.values(interview.scores);
-                    return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-                });
-            const avgScore = categoryScores.length > 0
-                ? categoryScores.reduce((sum, score) => sum + score, 0) / categoryScores.length
-                : 0;
-            return { name: category, value: parseFloat(avgScore.toFixed(1)), color: ['#2563eb', '#1d4ed8', '#1e40af', '#3b82f6'][index] };
+        const grouped: Record<string, Interview[]> = {};
+        interviews.forEach((interview) => {
+            const key = `${interview.interviewType} - ${interview.interviewRole}`;
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push(interview);
         });
-        return distribution.filter((item) => item.value > 0);
+
+        const colors = ['#2563eb', '#1d4ed8', '#1e40af', '#3b82f6', '#60a5fa', '#93c5fd'];
+        return Object.entries(grouped).map(([key, interviews], index) => {
+            const avgScore = interviews.length > 0
+                ? interviews.reduce((sum, interview) => {
+                    const scores = Object.values(interview.scores);
+                    return sum + (scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0);
+                }, 0) / interviews.length
+                : 0;
+            return {
+                name: key,
+                value: parseFloat(avgScore.toFixed(1)),
+                color: colors[index % colors.length]
+            };
+        }).filter(item => item.value > 0);
     };
 
-    const monthlyData = getMonthlyScores(interviewData);
+    const filteredData = getFilteredData(interviewData, selectedRange);
     const scoreDistribution = getScoreDistribution(interviewData);
 
     const services = [
@@ -351,94 +346,94 @@ const Dashboard = () => {
                     </div>
 
                     {/* Charts */}
-                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
-                        {/* Interview Performance Chart */}
-                        <div className="xl:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2 sm:mb-0">Interview Performance (Monthly)</h3>
-                                <select
-                                    value={selectedRange}
-                                    onChange={(e) => setSelectedRange(e.target.value)}
-                                    className="px-3 py-2 rounded-lg bg-white text-gray-700 border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                >
-                                    <option>Today</option>
-                                    <option>Last 7 Days</option>
-                                    <option>All Time</option>
-                                </select>
-
-                            </div>
-                            <div className="mb-6">
-                                <div className="flex items-center space-x-2">
-                                    <span className="text-3xl font-bold text-gray-900">
-                                        {interviewData.length > 0
-                                            ? (interviewData.reduce((sum, interview) => {
-                                                const scores = Object.values(interview.scores);
-                                                return sum + (scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0);
-                                            }, 0) / interviewData.length).toFixed(1)
-                                            : '0.0'}
-                                    </span>
-                                    <span className="text-sm text-green-600 font-medium">↗ +10%</span>
+                    <div className="flex-1 p-4 sm:p-6 lg:p-8 bg-gray-50">
+                        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+                            <div className="xl:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-2 sm:mb-0">Interview Performance</h3>
+                                    <select
+                                        value={selectedRange}
+                                        onChange={(e) => setSelectedRange(e.target.value)}
+                                        className="px-3 py-2 rounded-lg bg-white text-gray-700 border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    >
+                                        <option value="today">Today</option>
+                                        <option value="Last 7 Days">Last 7 Days</option>
+                                        <option value="Last 30 Days">Last 30 Days</option>
+                                        <option value="All Time">All Time</option>
+                                    </select>
                                 </div>
-                                <p className="text-sm text-gray-500">Average score across all interviews</p>
-                            </div>
-                            <div className="h-64">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={monthlyData}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-                                        <XAxis dataKey="month" stroke="#6b7280" fontSize={12} />
-                                        <YAxis stroke="#6b7280" fontSize={12} />
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: 'white',
-                                                border: '1px solid #e5e7eb',
-                                                borderRadius: '8px',
-                                                fontSize: '12px'
-                                            }}
-                                        />
-                                        <Bar dataKey="value" fill="#2563eb" radius={[4, 4, 0, 0]} />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </div>
-
-                        {/* Score Distribution */}
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-lg font-semibold text-gray-900">Score Distribution</h3>
-                                <select className="px-3 py-2 rounded-lg bg-white text-gray-700 border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <option>All Interviews</option>
-                                </select>
-                            </div>
-                            <div className="flex justify-center mb-6">
-                                <div className="w-40 h-40">
+                                <div className="mb-6">
+                                    <div className="flex items-center space-x-2">
+                                        <span className="text-3xl font-bold text-gray-900">
+                                            {interviewData.length > 0
+                                                ? (interviewData.reduce((sum, interview) => {
+                                                    const scores = Object.values(interview.scores);
+                                                    return sum + (scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0);
+                                                }, 0) / interviewData.length).toFixed(1)
+                                                : '0.0'}
+                                        </span>
+                                        <span className="text-sm text-green-600 font-medium">↗ +10%</span>
+                                    </div>
+                                    <p className="text-sm text-gray-500">Average score across all interviews</p>
+                                </div>
+                                <div className="h-64">
                                     <ResponsiveContainer width="100%" height="100%">
-                                        <PieChart>
-                                            <Pie
-                                                data={scoreDistribution}
-                                                cx="50%"
-                                                cy="50%"
-                                                innerRadius={50}
-                                                outerRadius={70}
-                                                dataKey="value"
-                                            >
-                                                {scoreDistribution.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={entry.color} />
-                                                ))}
-                                            </Pie>
-                                        </PieChart>
+                                        <BarChart data={filteredData}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+                                            <XAxis dataKey="label" stroke="#6b7280" fontSize={12} />
+                                            <YAxis stroke="#6b7280" fontSize={12} />
+                                            <Tooltip
+                                                contentStyle={{
+                                                    backgroundColor: 'white',
+                                                    border: '1px solid #e5e7eb',
+                                                    borderRadius: '8px',
+                                                    fontSize: '12px'
+                                                }}
+                                            />
+                                            <Bar dataKey="value" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                                        </BarChart>
                                     </ResponsiveContainer>
                                 </div>
                             </div>
-                            <div className="space-y-3">
-                                {scoreDistribution.map((item, index) => (
-                                    <div key={index} className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-                                            <span className="text-sm text-gray-700">{item.name}</span>
-                                        </div>
-                                        <span className="text-sm font-medium text-gray-900">{item.value}%</span>
+
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-lg font-semibold text-gray-900">Score Distribution</h3>
+                                    <select className="px-3 py-2 rounded-lg bg-white text-gray-700 border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option>All Interviews</option>
+                                    </select>
+                                </div>
+                                <div className="flex justify-center mb-6">
+                                    <div className="w-40 h-40">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <PieChart>
+                                                <Pie
+                                                    data={scoreDistribution}
+                                                    cx="50%"
+                                                    cy="50%"
+                                                    innerRadius={50}
+                                                    outerRadius={70}
+                                                    dataKey="value"
+                                                >
+                                                    {scoreDistribution.map((entry, index) => (
+                                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                                    ))}
+                                                </Pie>
+                                            </PieChart>
+                                        </ResponsiveContainer>
                                     </div>
-                                ))}
+                                </div>
+                                <div className="space-y-3">
+                                    {scoreDistribution.map((item, index) => (
+                                        <div key={index} className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-3">
+                                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                                                <span className="text-sm text-gray-700">{item.name}</span>
+                                            </div>
+                                            <span className="text-sm font-medium text-gray-900">{item.value}%</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -462,7 +457,7 @@ const Dashboard = () => {
                             Access ATS Resume Scan, Resume Builder, and Job Search with our Premium Membership.
                         </p>
                         <button
-                            onClick={() => router.push('/premium')}
+                            onClick={() => router.push('/subscription')}
                             className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-sm"
                         >
                             Get Premium

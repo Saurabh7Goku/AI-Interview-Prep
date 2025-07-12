@@ -112,14 +112,6 @@ export default function HistoryPage() {
         });
     };
 
-    const sidebarItems = [
-        { name: "Dashboard", icon: Home, path: "/" },
-        { name: "ATS Scan", icon: FileText, path: "/ats-scan" },
-        { name: "Job Finder", icon: Search, path: "/job-finder" },
-        { name: "Mock Interview", icon: MessageCircle, path: "/mock-interview" },
-        { name: "History", icon: History, path: "/history", active: true },
-    ];
-
     if (isLoadingAuth) {
         return (
             <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -135,7 +127,7 @@ export default function HistoryPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-900 flex relative">
+        <div className="min-h-screen bg-gradient-to-br from-[#ADBBD4] via-[#DDD3E8] to-[#8697C4] flex relative">
             {/* Background Grid Pattern */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
 
