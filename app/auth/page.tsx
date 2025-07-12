@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "@/firebase/firebase";
+import { sendEmailVerification } from "firebase/auth";
 import { useToast } from "@/components/ToastProvide";
 import { Briefcase, Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
 
@@ -48,36 +49,39 @@ export default function AuthPage() {
         try {
             if (isSignUp) {
                 // Validate password strength for sign-up
-                if (password.length < 6) {
-                    throw new Error("Password must be at least 6 characters long.");
+                if (password.length <= 8) {
+                    throw new Error("Password must be at least 8 characters long.");
                 }
-                await createUserWithEmailAndPassword(auth, email, password);
-                showToast("✅ Account created successfully!", "success");
-                router.push("/history");
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                if (userCredential.user) {
+                    await sendEmailVerification(userCredential.user);
+                    showToast("✅Please verify your email before signing in.", "success");
+                }
             } else {
-                try {
-                    await signInWithEmailAndPassword(auth, email, password);
-                    showToast("✅ Signed in successfully!", "success");
-                    router.push("/history");
-                } catch (error: any) {
-                    if (error.code === "auth/user-not-found") {
-                        setError("No account found with this email.");
-                        showToast("❌ No account found with this email.", "error");
-                    } else if (error.code === "auth/wrong-password") {
-                        setError("Incorrect password.");
-                        showToast("❌ Incorrect password.", "error");
-                    } else if (error.code === "auth/invalid-email") {
-                        setError("Invalid email format.");
-                        showToast("❌ Invalid email format.", "error");
-                    } else {
-                        setError(error.message);
-                        showToast(`❌ Sign-in failed: ${error.message}`, "error");
-                    }
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                if (!userCredential.user.emailVerified) {
+                    setError("Please verify your email before signing in.");
+                    showToast("❌ Please verify your email before signing in.", "error");
+                    setLoading(false);
+                    return;
                 }
+                showToast("✅ Signed in successfully!", "success");
+                router.push("/history");
             }
         } catch (error: any) {
-            setError(error.message);
-            showToast(`❌ ${isSignUp ? "Sign-up" : "Sign-in"} failed: ${error.message}`, "error");
+            if (error.code === "auth/user-not-found") {
+                setError("No account found with this email.");
+                showToast("❌ No account found with this email.", "error");
+            } else if (error.code === "auth/wrong-password") {
+                setError("Incorrect password.");
+                showToast("❌ Incorrect password.", "error");
+            } else if (error.code === "auth/invalid-email") {
+                setError("Invalid email format.");
+                showToast("❌ Invalid email format.", "error");
+            } else {
+                setError(error.message);
+                showToast(`❌ ${isSignUp ? "Sign-up" : "Sign-in"} failed: ${error.message}`, "error");
+            }
         } finally {
             setLoading(false);
         }
