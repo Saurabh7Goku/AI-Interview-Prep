@@ -16,12 +16,16 @@ export default function InterviewPage() {
     const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
     const [feedbacks, setFeedbacks] = useState<Record<number, string>>({});
     const [scores, setScores] = useState<Record<number, number>>({});
+    const [interviewType, setInterviewType] = useState<string>("");
+    const [interviewRole, setInterviewRole] = useState<string>("");
+    const [skills, setSkills] = useState<string>("");
     const [timer, setTimer] = useState(0);
     const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
     const [isWebcamVisible, setIsWebcamVisible] = useState(false);
     const [isWebcamMinimized, setIsWebcamMinimized] = useState(true);
     const [webcamStream, setWebcamStream] = useState<MediaStream | null>(null);
     const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
     const [isTtsEnabled, setIsTtsEnabled] = useState(true);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -42,7 +46,6 @@ export default function InterviewPage() {
         "Talk to me about",
     ];
 
-
     useEffect(() => {
         if (!isTtsEnabled || questions.length === 0 || !questions[currentIndex] || !window.speechSynthesis) {
             if (!window.speechSynthesis) {
@@ -54,25 +57,18 @@ export default function InterviewPage() {
 
         const playQuestionAudio = () => {
             try {
-                // Cancel any ongoing speech
                 window.speechSynthesis.cancel();
-
-                // Select a prefix based on currentIndex
                 const prefix = prefixes[currentIndex % prefixes.length];
                 const utterance = new SpeechSynthesisUtterance(`${prefix}, ${questions[currentIndex]}`);
                 utterance.lang = "en-US";
                 utterance.rate = 1.0;
                 utterance.pitch = 1.0;
-
-                // Select a female voice if available
                 const voices = window.speechSynthesis.getVoices();
                 const femaleVoice = voices.find((voice) => voice.lang === "en-US" && (voice.name.includes("female") || voice.name.includes("Google US English")));
                 if (femaleVoice) {
                     utterance.voice = femaleVoice;
                 }
-
                 window.speechSynthesis.speak(utterance);
-
                 utterance.onerror = (event) => {
                     console.error("Speech synthesis error:", event.error);
                     showToast(`❌ Failed to play audio: ${event.error}. Please check browser settings.`, "error");
@@ -83,7 +79,6 @@ export default function InterviewPage() {
             }
         };
 
-        // Ensure voices are loaded before playing
         if (window.speechSynthesis.getVoices().length === 0) {
             window.speechSynthesis.onvoiceschanged = () => {
                 if (timeoutRef.current) {
@@ -116,13 +111,58 @@ export default function InterviewPage() {
                 return;
             }
 
+            // Only clear localStorage if no valid session exists
             const storedQuestions = localStorage.getItem("questions");
-            if (storedQuestions) {
-                const parsed = JSON.parse(storedQuestions);
-                setQuestions(parsed.length > 10 ? parsed.slice(0, 10) : parsed);
+            if (!storedQuestions) {
+                localStorage.removeItem("userAnswers");
+                localStorage.removeItem("feedbacks");
+                localStorage.removeItem("scores");
+                localStorage.removeItem("currentQuestionIndex");
+                localStorage.removeItem("interviewType");
+                localStorage.removeItem("interviewRole");
             }
+
+            // Retrieve and validate data from localStorage
+            if (storedQuestions) {
+                try {
+                    const parsed = JSON.parse(storedQuestions);
+                    if (Array.isArray(parsed)) {
+                        setQuestions(parsed.length > 10 ? parsed.slice(0, 10) : parsed);
+                    }
+                } catch (error) {
+                    console.error("Error parsing questions from localStorage:", error);
+                    showToast("❌ Failed to load questions.", "error");
+                }
+            }
+
+            const storedInterviewType = localStorage.getItem("interviewType");
+            const storedInterviewRole = localStorage.getItem("interviewRole");
+            const storedSkills = localStorage.getItem("skills");
             const idx = localStorage.getItem("currentQuestionIndex");
-            if (idx) setCurrentIndex(parseInt(idx));
+
+            if (storedInterviewType && ["Technical", "HR", "Managerial", "Mixed"].includes(storedInterviewType)) {
+                setInterviewType(storedInterviewType);
+            } else if (storedInterviewType) {
+                console.warn("Invalid interviewType in localStorage:", storedInterviewType);
+                localStorage.removeItem("interviewType");
+            }
+
+            if (storedInterviewRole && storedInterviewRole.trim()) {
+                setInterviewRole(storedInterviewRole);
+            } else if (storedInterviewRole) {
+                console.warn("Invalid interviewRole in localStorage:", storedInterviewRole);
+                localStorage.removeItem("interviewRole");
+            }
+            if (storedSkills && storedSkills.trim()) {
+                setSkills(storedSkills);
+            } else if (storedSkills) {
+                console.warn("Invalid skills in localstorage: ", storedSkills);
+            }
+
+            if (idx && !isNaN(parseInt(idx))) {
+                setCurrentIndex(parseInt(idx));
+            }
+
             setIsLoadingAuth(false);
         });
         return () => unsubscribe();
@@ -150,7 +190,6 @@ export default function InterviewPage() {
             return;
         }
 
-        // Save the current answer
         const updatedUserAnswers = { ...userAnswers, [currentIndex]: userAnswer };
         setUserAnswers(updatedUserAnswers);
         localStorage.setItem("userAnswers", JSON.stringify(updatedUserAnswers));
@@ -158,12 +197,11 @@ export default function InterviewPage() {
         let updatedFeedbacks = { ...feedbacks };
         let updatedScores = { ...scores };
 
-        // Evaluate the answer or get ideal answer for skipped question
         if (userAnswer === "Skipped") {
             try {
                 console.log(`Fetching ideal answer for question ${currentIndex + 1}: ${questions[currentIndex]}`);
                 const idealAnswer = await getIdealAnswer(questions[currentIndex]);
-                const updatedFeedbacks = {
+                updatedFeedbacks = {
                     ...feedbacks,
                     [currentIndex]: `Ideal Answer: ${idealAnswer}`,
                 };
@@ -208,7 +246,6 @@ export default function InterviewPage() {
             }
         }
 
-        // Proceed to next question or save and redirect
         if (currentIndex < questions.length - 1) {
             const nextIndex = currentIndex + 1;
             setCurrentIndex(nextIndex);
@@ -216,21 +253,45 @@ export default function InterviewPage() {
             localStorage.setItem("currentQuestionIndex", nextIndex.toString());
             console.log(`Moving to question ${nextIndex + 1}`);
         } else {
+            setIsSaving(true);
             try {
-                console.log("Saving interview to Firebase:", { userId: user.uid, questions, answers: updatedUserAnswers, feedbacks: updatedFeedbacks, scores: updatedScores });
+                console.log("Saving interview to Firebase:", {
+                    userId: user.uid,
+                    questions,
+                    answers: updatedUserAnswers,
+                    feedbacks: updatedFeedbacks,
+                    scores: updatedScores,
+                    interviewType,
+                    interviewRole,
+                    skills,
+                });
                 await saveInterview(user.uid, {
                     questions,
                     answers: updatedUserAnswers,
                     feedbacks: updatedFeedbacks,
                     scores: updatedScores,
+                    interviewType,
+                    interviewRole,
+                    skills,
+                    createdAt: new Date().toISOString(),
                 });
                 showToast("✅ Interview saved successfully!", "success");
+                // Clear localStorage to prevent stale data
+                localStorage.removeItem("questions");
+                localStorage.removeItem("userAnswers");
+                localStorage.removeItem("feedbacks");
+                localStorage.removeItem("scores");
+                localStorage.removeItem("currentQuestionIndex");
+                localStorage.removeItem("interviewType");
+                localStorage.removeItem("interviewRole");
                 console.log("Interview saved successfully, redirecting to /results");
                 router.push("/results");
             } catch (error) {
                 console.error("Error saving interview:", error);
                 showToast("❌ Failed to save interview.", "error");
                 router.push("/results");
+            } finally {
+                setIsSaving(false);
             }
         }
     };
@@ -298,15 +359,12 @@ export default function InterviewPage() {
             utterance.lang = "en-US";
             utterance.rate = 1.0;
             utterance.pitch = 1.0;
-
             const voices = window.speechSynthesis.getVoices();
             const femaleVoice = voices.find((voice) => voice.lang === "en-US" && (voice.name.includes("female") || voice.name.includes("Google US English")));
             if (femaleVoice) {
                 utterance.voice = femaleVoice;
             }
-
             window.speechSynthesis.speak(utterance);
-
             utterance.onerror = (event) => {
                 console.error("Speech synthesis error:", event.error);
                 showToast(`❌ Failed to play audio: ${event.error}. Please check browser settings.`, "error");
@@ -320,9 +378,10 @@ export default function InterviewPage() {
     if (isLoadingAuth) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
-                <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 p-8 max-w-md w-full mx-4 text-center animate-fade-in">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
-                        <Clock className="w-8 h-8 text-white animate-spin" />
+                <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 p-8 max-w-md w-full mx-4 text-center animate-pulse">
+                    <div className="relative w-16 h-16 mx-auto mb-4">
+                        <div className="absolute inset-0 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                        <div className="absolute inset-2 border-4 border-purple-600 border-t-transparent rounded-full animate-spin animate-reverse"></div>
                     </div>
                     <h2 className="text-xl font-semibold text-gray-800 mb-2">Loading...</h2>
                     <p className="text-gray-600">Checking authentication status</p>
@@ -331,12 +390,28 @@ export default function InterviewPage() {
         );
     }
 
+    if (isSaving) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
+                <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 p-8 max-w-md w-full mx-4 text-center">
+                    <div className="relative w-16 h-16 mx-auto mb-4">
+                        <div className="absolute inset-0 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                        <div className="absolute inset-2 border-4 border-purple-600 border-t-transparent rounded-full animate-spin animate-reverse"></div>
+                    </div>
+                    <h2 className="text-xl font-semibold text-gray-800 mb-2">Saving Interview...</h2>
+                    <p className="text-gray-600">Please wait while we save your responses</p>
+                </div>
+            </div>
+        );
+    }
+
     if (questions.length === 0) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
-                <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 p-8 max-w-md w-full mx-4 text-center animate-fade-in">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
-                        <Clock className="w-8 h-8 text-white animate-spin" />
+                <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 p-8 max-w-md w-full mx-4 text-center">
+                    <div className="relative w-16 h-16 mx-auto mb-4">
+                        <div className="absolute inset-0 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                        <div className="absolute inset-2 border-4 border-purple-600 border-t-transparent rounded-full animate-spin animate-reverse"></div>
                     </div>
                     <h2 className="text-xl font-semibold text-gray-800 mb-2">Loading Questions...</h2>
                     <p className="text-gray-600">Preparing your personalized interview</p>
@@ -367,7 +442,9 @@ export default function InterviewPage() {
                             <div className="flex items-center space-x-3">
                                 <div>
                                     <h1 className="text-lg font-bold text-slate-800">Interview Practice</h1>
-                                    <p className="text-xs text-slate-500">AI-powered interview preparation</p>
+                                    <p className="text-xs text-slate-500">
+                                        {interviewType} Interview for {interviewRole}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -387,8 +464,7 @@ export default function InterviewPage() {
                             </div>
                             <button
                                 onClick={toggleTts}
-                                className={`p-2 rounded-full transition-colors duration-200 ${isTtsEnabled ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
-                                    }`}
+                                className={`p-2 rounded-full transition-colors duration-200 ${isTtsEnabled ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"}`}
                             >
                                 {isTtsEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
                             </button>
@@ -436,10 +512,7 @@ export default function InterviewPage() {
                                         <button
                                             onClick={handlePrevious}
                                             disabled={currentIndex === 0}
-                                            className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 text-sm font-medium
-                        ${currentIndex === 0
-                                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                                                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:shadow-md'}`}
+                                            className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 text-sm font-medium ${currentIndex === 0 ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-slate-100 text-slate-700 hover:bg-slate-200 hover:shadow-md"}`}
                                         >
                                             <ArrowLeft className="w-4 h-4" />
                                             <span>Previous</span>
@@ -486,10 +559,7 @@ export default function InterviewPage() {
                                     <h3 className="text-sm font-semibold text-slate-800">Camera</h3>
                                     <button
                                         onClick={toggleWebcam}
-                                        className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg transition-all duration-200 text-sm font-medium
-                      ${isWebcamVisible
-                                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                                : 'bg-green-100 text-green-700 hover:bg-green-200'}`}
+                                        className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg transition-all duration-200 text-sm font-medium ${isWebcamVisible ? "bg-red-100 text-red-700 hover:bg-red-200" : "bg-green-100 text-green-700 hover:bg-green-200"}`}
                                     >
                                         {isWebcamVisible ? (
                                             <>
@@ -535,10 +605,7 @@ export default function InterviewPage() {
                                                 setTimer(0);
                                                 localStorage.setItem("currentQuestionIndex", index.toString());
                                             }}
-                                            className={`w-full text-left p-3 rounded-lg transition-all duration-200 group
-                        ${index === currentIndex
-                                                    ? 'bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 shadow-md'
-                                                    : 'bg-slate-50 text-slate-700 hover:bg-slate-100 hover:shadow-md'}`}
+                                            className={`w-full text-left p-3 rounded-lg transition-all duration-200 group ${index === currentIndex ? "bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 shadow-md" : "bg-slate-50 text-slate-700 hover:bg-slate-100 hover:shadow-md"}`}
                                         >
                                             <div className="flex items-center justify-between mb-1">
                                                 <span className="text-xs font-medium">Question {index + 1}</span>
@@ -559,7 +626,7 @@ export default function InterviewPage() {
                 </div>
             </div>
 
-            <div className={`fixed inset-0 z-40 lg:hidden transform transition-transform duration-300 ${isSidePanelOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            <div className={`fixed inset-0 z-40 lg:hidden transform transition-transform duration-300 ${isSidePanelOpen ? "translate-x-0" : "translate-x-full"}`}>
                 <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={toggleSidePanel}></div>
                 <div className="absolute right-0 top-0 bottom-0 w-80 bg-white shadow-2xl p-6 overflow-y-auto">
                     <div className="flex items-center justify-between mb-6">
@@ -581,10 +648,7 @@ export default function InterviewPage() {
                                     setIsSidePanelOpen(false);
                                     localStorage.setItem("currentQuestionIndex", index.toString());
                                 }}
-                                className={`w-full text-left p-4 rounded-xl transition-all duration-200
-                  ${index === currentIndex
-                                        ? 'bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 shadow-lg'
-                                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100 hover:shadow-md'}`}
+                                className={`w-full text-left p-4 rounded-xl transition-all duration-200 ${index === currentIndex ? "bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 shadow-lg" : "bg-slate-50 text-slate-700 hover:bg-slate-100 hover:shadow-md"}`}
                             >
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-sm font-medium">Question {index + 1}</span>
@@ -603,26 +667,29 @@ export default function InterviewPage() {
             </div>
 
             <style jsx>{`
-        .animate-fade-in {
-          animation: fadeIn 0.6s ease-out;
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-        .line-clamp-3 {
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
+                .animate-fade-in {
+                    animation: fadeIn 0.6s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .line-clamp-2 {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+                .line-clamp-3 {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 3;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+                .animate-reverse {
+                    animation-direction: reverse;
+                }
+            `}</style>
         </div>
     );
 }

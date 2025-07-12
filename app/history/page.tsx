@@ -3,7 +3,22 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth, getInterviewHistory, Interview } from "@/firebase/firebase";
 import { useToast } from "@/components/ToastProvide";
-import { ArrowLeft, Briefcase, Clock, Trophy, Calendar, TrendingUp, User, ChevronRight } from "lucide-react";
+import {
+    Home,
+    FileText,
+    Search,
+    MessageCircle,
+    History,
+    Clock,
+    Trophy,
+    Calendar,
+    TrendingUp,
+    User,
+    ChevronRight,
+    Menu,
+    X,
+    Filter
+} from "lucide-react";
 import ResultsSummary from "@/components/ResultsSummary";
 import { Timestamp } from "firebase/firestore";
 
@@ -14,6 +29,7 @@ export default function HistoryPage() {
     const [selectedInterview, setSelectedInterview] = useState<Interview | null>(null);
     const [isLoadingAuth, setIsLoadingAuth] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
         const checkMobile = () => {
@@ -60,35 +76,23 @@ export default function HistoryPage() {
     };
 
     const getScoreColor = (score: number) => {
-        if (score >= 8) return "from-emerald-500 to-green-600";
-        if (score >= 6) return "from-yellow-400 to-orange-500";
-        return "from-red-400 to-red-600";
+        if (score >= 8) return "bg-green-500";
+        if (score >= 6) return "bg-orange-500";
+        return "bg-red-500";
     };
 
-    const getScoreTextColor = (score: number) => {
-        if (score >= 8) return "text-emerald-600";
-        if (score >= 6) return "text-yellow-600";
-        return "text-red-600";
+    const getScoreLabel = (score: number) => {
+        if (score >= 8) return "Excellent";
+        if (score >= 6) return "Average";
+        return "Poor";
     };
 
-    // Convert createdAt to Date object
     const formatDate = (createdAt: string | Timestamp) => {
         const date = typeof createdAt === "string" ? new Date(createdAt) : createdAt.toDate();
         return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
             year: 'numeric'
-        });
-    };
-
-    const formatDateTime = (createdAt: string | Timestamp) => {
-        const date = typeof createdAt === "string" ? new Date(createdAt) : createdAt.toDate();
-        return date.toLocaleString('en-US', {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
         });
     };
 
@@ -100,256 +104,267 @@ export default function HistoryPage() {
         });
     };
 
-    const getOverallStats = () => {
-        if (history.length === 0) return { avgScore: 0, totalInterviews: 0, bestScore: 0 };
-
-        const scores = history.map(interview => getAvgScore(interview.scores));
-        const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
-        const bestScore = Math.max(...scores);
-
-        return {
-            avgScore: avgScore,
-            totalInterviews: history.length,
-            bestScore: bestScore
-        };
-    };
-
-    const stats = getOverallStats();
+    const sidebarItems = [
+        { name: "Dashboard", icon: Home, path: "/" },
+        { name: "ATS Scan", icon: FileText, path: "/ats-scan" },
+        { name: "Job Finder", icon: Search, path: "/job-finder" },
+        { name: "Mock Interview", icon: MessageCircle, path: "/mock-interview" },
+        { name: "History", icon: History, path: "/history", active: true },
+    ];
 
     if (isLoadingAuth) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
-                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 max-w-md w-full text-center">
-                    <div className="relative mb-6">
-                        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 rounded-full shadow-lg">
-                            <Clock className="w-10 h-10 text-white animate-spin" />
-                        </div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 rounded-full opacity-20 animate-pulse scale-110"></div>
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-3">Loading Your History</h2>
-                    <p className="text-gray-600">Fetching your interview records...</p>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <Clock className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+                    <p className="text-gray-600">Loading your history...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-            {/* Enhanced Header */}
-            <header className="bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-lg sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex items-center justify-between">
+        <div className="min-h-screen bg-gray-50 flex">
+            {/* Sidebar */}
+            <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0`}>
+                <div className="flex items-center justify-between h-16 px-6 bg-gray-800">
+                    <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">IP</span>
+                        </div>
+                        <span className="text-white font-bold text-lg">aiInterPrep</span>
+                    </div>
+                    <button
+                        onClick={() => setSidebarOpen(false)}
+                        className="md:hidden text-gray-400 hover:text-white"
+                    >
+                        <X className="w-6 h-6" />
+                    </button>
+                </div>
+
+                <nav className="mt-8">
+                    <div className="px-4 mb-4">
+                        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Main Menu</h3>
+                    </div>
+                    {sidebarItems.map((item) => (
+                        <button
+                            key={item.name}
+                            onClick={() => router.push(item.path)}
+                            className={`w-full flex items-center px-6 py-3 text-left transition-colors ${item.active
+                                ? 'bg-gray-800 text-white border-r-2 border-blue-600'
+                                : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                                }`}
+                        >
+                            <item.icon className="w-5 h-5 mr-3" />
+                            {item.name}
+                        </button>
+                    ))}
+                </nav>
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col overflow-hidden">
+                {/* Header */}
+                <header className="bg-white shadow-sm border-b border-gray-200">
+                    <div className="flex items-center justify-between px-4 py-4">
                         <div className="flex items-center space-x-4">
                             <button
-                                onClick={() => router.push("/")}
-                                className="group p-3 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 rounded-2xl transition-all duration-300 transform hover:scale-105"
-                                aria-label="Go back"
+                                onClick={() => setSidebarOpen(true)}
+                                className="md:hidden text-gray-600 hover:text-gray-900"
                             >
-                                <ArrowLeft className="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors duration-300" />
+                                <Menu className="w-5 h-5" />
                             </button>
-                            <div className="flex items-center space-x-3">
-                                <div className="relative">
-                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg">
-                                        <Briefcase className="w-6 h-6 text-white" />
-                                    </div>
-                                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
-                                </div>
-                                <div>
-                                    <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                                        Interview History
-                                    </h1>
-                                    <p className="text-sm text-gray-600 hidden sm:block">Track your progress and improvements</p>
-                                </div>
+                            <div>
+                                <h1 className="text-base md:text-2xl font-semibold text-gray-900">History</h1>
+                                <p className="hidden md:block text-gray-500 text-sm">Showing your all histories with a clear view.</p>
                             </div>
                         </div>
-
-                        {/* Stats Overview */}
-                        <div className="hidden lg:flex items-center space-x-6">
-                            <div className="text-center">
-                                <div className="text-2xl font-bold text-blue-600">{stats.totalInterviews}</div>
-                                <div className="text-xs text-gray-500">Total</div>
-                            </div>
-                            <div className="text-center">
-                                <div className={`text-2xl font-bold ${getScoreTextColor(stats.avgScore)}`}>
-                                    {stats.avgScore.toFixed(1)}
-                                </div>
-                                <div className="text-xs text-gray-500">Average</div>
-                            </div>
-                            <div className="text-center">
-                                <div className={`text-2xl font-bold ${getScoreTextColor(stats.bestScore)}`}>
-                                    {stats.bestScore.toFixed(1)}
-                                </div>
-                                <div className="text-xs text-gray-500">Best</div>
-                            </div>
+                        <div className="flex items-center space-x-4">
+                            <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
                         </div>
                     </div>
-                </div>
-            </header>
+                </header>
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-                {/* Mobile Stats */}
-                <div className="lg:hidden mb-6">
-                    <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg border border-white/20 p-4 sm:p-6">
-                        <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
-                            <div className="min-w-0">
-                                <div className="text-lg sm:text-2xl font-bold text-blue-600">{stats.totalInterviews}</div>
-                                <div className="text-xs text-gray-500 truncate">Total Interviews</div>
-                            </div>
-                            <div className="min-w-0">
-                                <div className={`text-lg sm:text-2xl font-bold ${getScoreTextColor(stats.avgScore)}`}>
-                                    {stats.avgScore.toFixed(1)}
-                                </div>
-                                <div className="text-xs text-gray-500 truncate">Average Score</div>
-                            </div>
-                            <div className="min-w-0">
-                                <div className={`text-lg sm:text-2xl font-bold ${getScoreTextColor(stats.bestScore)}`}>
-                                    {stats.bestScore.toFixed(1)}
-                                </div>
-                                <div className="text-xs text-gray-500 truncate">Best Score</div>
-                            </div>
+                {/* Content */}
+                <main className="flex-1 overflow-auto p-6">
+                    {history.length === 0 ? (
+                        <div className="text-center py-12">
+                            <History className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-500">No interviews yet</p>
+                            <p className="text-sm text-gray-400 mt-1">Complete your first interview to see it here</p>
                         </div>
-                    </div>
-                </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {history.map((interview) => {
+                                const avgScore = getAvgScore(interview.scores);
+                                const scoreLabel = getScoreLabel(avgScore);
+                                const scoreColor = getScoreColor(avgScore);
+                                const isSelected = selectedInterview?.id === interview.id;
 
-                <div className="flex flex-col lg:grid lg:grid-cols-5 gap-6">
-                    {/* Interview List */}
-                    <div className="w-full lg:col-span-2 bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 overflow-hidden">
-                        <div className="p-4 sm:p-6 border-b border-gray-100">
-                            <h2 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center">
-                                <Calendar className="w-5 h-5 mr-2 text-blue-600" />
-                                Interview Sessions
-                            </h2>
-                            <p className="text-sm text-gray-600 mt-1">
-                                {history.length} session{history.length !== 1 ? 's' : ''} recorded
-                            </p>
-                        </div>
+                                return (
+                                    <div
+                                        key={interview.id}
+                                        className={`group relative bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 ${isSelected ? 'ring-2 ring-blue-500 shadow-blue-100' : ''
+                                            }`}
+                                        onClick={() => setSelectedInterview(interview)}
+                                    >
+                                        {/* Header with gradient background */}
+                                        <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
+                                            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+                                            <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/10 rounded-full translate-y-6 -translate-x-6"></div>
 
-                        <div className="max-h-[300px] sm:max-h-[400px] lg:max-h-[calc(100vh-300px)] overflow-y-auto custom-scrollbar">
-                            {history.length === 0 ? (
-                                <div className="p-6 sm:p-8 text-center">
-                                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <Briefcase className="w-8 h-8 text-gray-400" />
-                                    </div>
-                                    <p className="text-gray-500">No interviews yet</p>
-                                    <p className="text-sm text-gray-400 mt-1">Complete your first interview to see it here</p>
-                                </div>
-                            ) : (
-                                <div className="space-y-2 p-3 sm:p-4">
-                                    {history.map((interview, index) => {
-                                        const avgScore = getAvgScore(interview.scores);
-                                        const isSelected = selectedInterview?.id === interview.id;
-
-                                        return (
-                                            <button
-                                                key={interview.id}
-                                                onClick={() => setSelectedInterview(interview)}
-                                                className={`w-full text-left p-3 sm:p-4 rounded-2xl transition-all duration-300 transform hover:scale-[1.01] sm:hover:scale-[1.02] group ${isSelected
-                                                    ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-xl scale-[1.01] sm:scale-[1.02]"
-                                                    : "bg-white/60 text-gray-700 hover:bg-white/80 hover:shadow-lg border border-gray-100"
-                                                    }`}
-                                            >
-                                                <div className="flex items-center justify-between mb-2 sm:mb-3">
-                                                    <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
-                                                        <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 ${isSelected ? "bg-white/20" : "bg-gray-100"
-                                                            }`}>
-                                                            <User className={`w-4 h-4 sm:w-5 sm:h-5 ${isSelected ? "text-white" : "text-gray-600"
-                                                                }`} />
+                                            <div className="relative z-10">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <div className="flex items-center space-x-3">
+                                                        <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                                                            <User className="w-6 h-6 text-white" />
                                                         </div>
-                                                        <div className="min-w-0 flex-1">
-                                                            <div className={`font-semibold text-sm sm:text-base truncate ${isSelected ? "text-white" : "text-gray-800"
-                                                                }`}>
-                                                                {formatDate(interview.createdAt)}
-                                                            </div>
-                                                            <div className={`text-xs sm:text-sm ${isSelected ? "text-white/80" : "text-gray-500"
-                                                                }`}>
-                                                                {formatTime(interview.createdAt)}
-                                                            </div>
+                                                        <div>
+                                                            <h3 className="font-bold text-lg leading-tight">{interview.interviewRole}</h3>
+                                                            <p className="text-blue-100 text-sm font-medium">{interview.interviewType} Interview</p>
                                                         </div>
                                                     </div>
-                                                    <ChevronRight className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 shrink-0 ${isSelected ? "text-white rotate-90" : "text-gray-400 group-hover:rotate-90"
-                                                        }`} />
                                                 </div>
 
-                                                <div className="flex items-center justify-between">
-                                                    <div className={`flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1 ${isSelected ? "text-white/90" : "text-gray-600"
-                                                        }`}>
-                                                        <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
-                                                        <span className="text-xs sm:text-sm truncate">
-                                                            {interview.questions.length} question{interview.questions.length !== 1 ? 's' : ''}
-                                                        </span>
+                                                {/* Performance Badge */}
+                                                <div className="flex justify-between items-center">
+                                                    <div className="bg-transparent rounded-xl p-1">
+                                                        <div className="flex items-center space-x-2 text-gray-600 mb-1">
+                                                            <Calendar className="w-4 h-4 text-white" />
+                                                            <span className="text-xs font-medium text-white">Date</span>
+                                                        </div>
+                                                        <div className="text-sm font-semibold text-white">{formatDate(interview.createdAt)}</div>
                                                     </div>
-                                                    <div className={`px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-bold shrink-0 ${isSelected
-                                                        ? "bg-white/20 text-white"
-                                                        : `bg-gradient-to-r ${getScoreColor(avgScore)} text-white`
-                                                        }`}>
-                                                        {avgScore.toFixed(1)}
-                                                    </div>
+                                                    <ChevronRight className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" />
                                                 </div>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Interview Details */}
-                    <div className="w-full lg:col-span-3">
-                        {selectedInterview ? (
-                            <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 overflow-hidden">
-                                <div className="p-4 sm:p-6 lg:p-8 border-b border-gray-100">
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                                        <h2 className="text-base md:text-3xl font-bold text-gray-800 flex items-center">
-                                            <Trophy className="w-6 h-6 sm:w-7 sm:h-7 mr-2 sm:mr-3 text-yellow-500" />
-                                            <span className="truncate">Interview Details</span>
-                                        </h2>
-                                        <div className={`px-2 py-1 md:px-4 sm:py-2 rounded-full text-sm md:text-lg font-bold bg-gradient-to-r ${getScoreColor(getAvgScore(selectedInterview.scores))} text-white shadow-lg self-start`}>
-                                            {getAvgScore(selectedInterview.scores).toFixed(1)}/10
+                                            </div>
                                         </div>
-                                    </div>
-                                    <p className="text-gray-600 flex items-center text-sm md:text-base">
-                                        <Calendar className="w-4 h-4 mr-2 shrink-0" />
-                                        <span className="truncate">{formatDateTime(selectedInterview.createdAt)}</span>
-                                    </p>
-                                </div>
 
-                                <div className="p-2 md:p-6 lg:p-8 text-sm">
-                                    <ResultsSummary
-                                        questions={selectedInterview.questions}
-                                        answers={selectedInterview.answers}
-                                        feedbacks={selectedInterview.feedbacks}
-                                        scores={selectedInterview.scores}
-                                    />
-                                </div>
+                                        {/* Content */}
+                                        <div className="p-3 md:p-6 ">
+                                            <div className="flex items-center justify-between border-t border-gray-100">
+                                                <div className="flex items-center space-x-2 text-gray-500">
+                                                    <Clock className="w-4 h-4" />
+                                                    <span className="text-sm font-medium">{formatTime(interview.createdAt)}</span>
+                                                </div>
+
+                                                <div className="flex items-center space-x-2">
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${scoreColor} text-white shadow-lg`}>
+                                                        {scoreLabel}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Statistics Grid */}
+                                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                                <div className="bg-gray-50 rounded-xl p-1">
+                                                    <div className="flex items-center space-x-2 text-gray-600 mb-1">
+                                                        <TrendingUp className="w-4 h-4" />
+                                                        <span className="text-sm font-semibold text-gray-700">Questions</span>
+                                                    </div>
+                                                    <div className="text-lg font-bold text-gray-900">{interview.questions.length}</div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="text-2xl font-bold">{avgScore.toFixed(1)}</div>
+                                                    <div className="text-xs font-bold text-blue-400">Score</div>
+                                                </div>
+                                            </div>
+
+                                            {/* Skills Section */}
+                                            {interview.skills && interview.skills.length > 0 && (
+                                                <div className="mb-4">
+                                                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Skills Assessed</h4>
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {interview.skills.split(',').slice(0, 3).map((skill, index) => (
+                                                            <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium">
+                                                                {skill.trim()}
+                                                            </span>
+                                                        ))}
+                                                        {interview.skills.split(',').length > 3 && (
+                                                            <span className="px-2 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs">
+                                                                +{interview.skills.split(',').length - 3} more
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                </div>
+                                            )}
+
+                                        </div>
+
+                                        {/* Hover effect overlay */}
+                                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </main>
+            </div>
+
+            {/* Interview Details Modal/Panel */}
+            {selectedInterview && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 md:hidden">
+                    <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="p-6 border-b border-gray-200">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-xl font-bold text-gray-900">Interview Details</h2>
+                                <button
+                                    onClick={() => setSelectedInterview(null)}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    <X className="w-6 h-6" />
+                                </button>
                             </div>
-                        ) : (
-                            <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-6 sm:p-8 lg:p-12 text-center">
-                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" />
-                                </div>
-                                <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">Select an Interview</h3>
-                                <p className="text-gray-600 text-sm sm:text-base">Choose an interview from the list to view detailed results and feedback.</p>
-                            </div>
-                        )}
+                        </div>
+                        <div className="p-6">
+                            <ResultsSummary
+                                questions={selectedInterview.questions}
+                                answers={selectedInterview.answers}
+                                feedbacks={selectedInterview.feedbacks}
+                                scores={selectedInterview.scores}
+                                interviewrole={selectedInterview.interviewRole}
+                                interviewtype={selectedInterview.interviewType}
+                            />
+                        </div>
                     </div>
                 </div>
-            </main>
+            )}
 
-            <style jsx>{`
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 4px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: rgba(99, 102, 241, 0.3);
-                    border-radius: 2px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: rgba(99, 102, 241, 0.5);
-                }
-            `}</style>
+            {/* Desktop Details Panel */}
+            {selectedInterview && !isMobile && (
+                <div className="hidden md:block fixed right-0 top-0 h-full w-1/2 bg-white shadow-xl z-40 overflow-y-auto">
+                    <div className="p-6 border-b border-gray-200">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-xl font-bold text-gray-900">Interview Details</h2>
+                            <button
+                                onClick={() => setSelectedInterview(null)}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="p-6">
+                        <ResultsSummary
+                            questions={selectedInterview.questions}
+                            answers={selectedInterview.answers}
+                            feedbacks={selectedInterview.feedbacks}
+                            scores={selectedInterview.scores}
+                            interviewrole={selectedInterview.interviewRole}
+                            interviewtype={selectedInterview.interviewType}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {/* Mobile Sidebar Overlay */}
+            {sidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
         </div>
     );
 }

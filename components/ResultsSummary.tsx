@@ -10,6 +10,8 @@ interface ResultsSummaryProps {
     answers: { [key: number]: string };
     feedbacks: { [key: number]: string };
     scores: { [key: number]: number };
+    interviewrole: string;
+    interviewtype: string;
 }
 
 export default function ResultsSummary({
@@ -17,6 +19,8 @@ export default function ResultsSummary({
     answers,
     feedbacks,
     scores,
+    interviewrole,
+    interviewtype,
 }: ResultsSummaryProps) {
     return (
         <div className="space-y-8">

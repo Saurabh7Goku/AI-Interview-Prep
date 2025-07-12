@@ -1,4 +1,3 @@
-
 "use client";
 import { useEffect, useState } from "react";
 import ResultsSummary from "@/components/ResultsSummary";
@@ -18,9 +17,13 @@ export default function ResultsPage() {
         answers: {},
         feedbacks: {},
         scores: {},
+        interviewType: "",
+        interviewRole: "",
+        skills: "",
         createdAt: "",
     });
     const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+    const [isLoadingResults, setIsLoadingResults] = useState(true);
 
     useEffect(() => {
         const fetchResults = async () => {
@@ -30,13 +33,21 @@ export default function ResultsPage() {
                 showToast("❌ Please sign in to view results.", "error");
                 router.push("/auth");
                 setIsLoadingAuth(false);
+                setIsLoadingResults(false);
                 return;
             }
 
             try {
                 const history = await getInterviewHistory(user.uid);
+                console.log("Fetched history:", history); // Debug log
                 if (history.length > 0) {
-                    const latestInterview = history[history.length - 1];
+                    // Sort by createdAt to ensure latest interview
+                    const latestInterview = history.sort((a, b) => {
+                        const dateA = typeof a.createdAt === "string" ? new Date(a.createdAt).getTime() : a.createdAt.toDate().getTime();
+                        const dateB = typeof b.createdAt === "string" ? new Date(b.createdAt).getTime() : b.createdAt.toDate().getTime();
+                        return dateB - dateA; // Descending order
+                    })[0];
+                    console.log("Latest interview:", latestInterview); // Debug log
                     setResults(latestInterview);
                 } else {
                     showToast("⚠️ No interview results found.", "warning");
@@ -46,6 +57,7 @@ export default function ResultsPage() {
                 console.error("Error loading results:", error);
             } finally {
                 setIsLoadingAuth(false);
+                setIsLoadingResults(false);
             }
         };
 
@@ -73,7 +85,6 @@ export default function ResultsPage() {
 
     const performance = getPerformanceLevel(avgScore);
 
-    // Convert createdAt to Date object
     const formatDate = (createdAt: string | Timestamp) => {
         const date = typeof createdAt === "string" ? new Date(createdAt) : createdAt.toDate();
         return date.toLocaleString();
@@ -124,15 +135,16 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
         }
     };
 
-    if (isLoadingAuth) {
+    if (isLoadingAuth || isLoadingResults) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
-                <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 p-8 max-w-md w-full mx-4 text-center animate-fade-in">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
-                        <Clock className="w-8 h-8 text-white animate-spin" />
+                <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 p-8 max-w-md w-full mx-4 text-center">
+                    <div className="relative w-16 h-16 mx-auto mb-4">
+                        <div className="absolute inset-0 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                        <div className="absolute inset-2 border-4 border-purple-600 border-t-transparent rounded-full animate-spin animate-reverse"></div>
                     </div>
-                    <h2 className="text-xl font-semibold text-gray-800 mb-2">Loading...</h2>
-                    <p className="text-gray-600">Fetching your results</p>
+                    <h2 className="text-xl font-semibold text-gray-800 mb-2">Loading Results...</h2>
+                    <p className="text-gray-600">Fetching your interview performance</p>
                 </div>
             </div>
         );
@@ -243,6 +255,8 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
                         answers={results.answers}
                         feedbacks={results.feedbacks}
                         scores={results.scores}
+                        interviewtype={results.interviewType}
+                        interviewrole={results.interviewRole}
                     />
                 </div>
                 <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
@@ -254,7 +268,14 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
                         <span>Take Another Interview</span>
                     </button>
                     <button
-                        onClick={() => router.push("/history")}
+                        onClick={() => {
+                            localStorage.removeItem("questions");
+                            localStorage.removeItem("userAnswers");
+                            localStorage.removeItem("feedbacks");
+                            localStorage.removeItem("scores");
+                            localStorage.removeItem("currentQuestionIndex");
+                            router.push("/history");
+                        }}
                         className="flex items-center justify-center space-x-2 px-8 py-4 bg-white/80 backdrop-blur-sm text-gray-700 font-semibold rounded-2xl border-2 border-gray-200 hover:border-blue-300 transition-all duration-300"
                     >
                         <ArrowLeft className="w-5 h-5" />
@@ -262,6 +283,11 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
                     </button>
                 </div>
             </main>
+            <style jsx>{`
+        .animate-reverse {
+          animation-direction: reverse;
+        }
+      `}</style>
         </div>
     );
 }

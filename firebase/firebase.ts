@@ -11,7 +11,10 @@ export interface Interview {
     answers: { [key: number]: string };
     feedbacks: { [key: number]: string };
     scores: { [key: number]: number };
-    createdAt: string | Timestamp; // Support both string and Timestamp for backward compatibility
+    interviewType: string;
+    interviewRole: string;
+    skills: string;
+    createdAt: string | Timestamp;
 }
 
 const firebaseConfig = {
@@ -32,7 +35,11 @@ export async function saveInterview(userId: string, interviewData: {
     answers: { [key: number]: string };
     feedbacks: { [key: number]: string };
     scores: { [key: number]: number };
-    timestamp?: string; // Backward compatibility for existing data
+    timestamp?: string;
+    interviewType: string;
+    interviewRole: string;
+    skills: string;
+    createdAt: string | Timestamp;
   }) {
     try {
       const docRef = await addDoc(collection(db, "interviews"), {
@@ -60,6 +67,9 @@ export async function getInterviewHistory(userId: string): Promise<Interview[]> 
         answers: doc.data().answers || {},
         feedbacks: doc.data().feedbacks || {},
         scores: doc.data().scores || {},
+        interviewType: doc.data().interviewType,
+        interviewRole: doc.data().interviewRole,
+        skills: doc.data().skills,
         createdAt: doc.data().createdAt ? (doc.data().createdAt instanceof Timestamp ? doc.data().createdAt.toDate().toISOString() : doc.data().createdAt) : "",
         timestamp: doc.data().timestamp || "",
       }));

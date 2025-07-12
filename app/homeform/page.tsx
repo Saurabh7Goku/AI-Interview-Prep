@@ -32,8 +32,12 @@ export default function HomeForm() {
                 }),
             });
             const data = await res.json();
+            // Store questions, interviewType, and jobProfile (as interviewRole) in localStorage
             localStorage.setItem("questions", JSON.stringify(data.questions));
             localStorage.setItem("currentQuestionIndex", "0");
+            localStorage.setItem("interviewType", interviewType);
+            localStorage.setItem("interviewRole", jobProfile);
+            localStorage.setItem("skills", skills)
             router.push("/interview");
         } catch (error) {
             console.error("Failed to generate questions.", error);
@@ -171,7 +175,6 @@ export default function HomeForm() {
                                                 <option value="Junior">Junior (1-3 years)</option>
                                                 <option value="Mid">Mid-level (3-6 years)</option>
                                                 <option value="Senior">Senior (6+ years)</option>
-
                                             </select>
                                             <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
                                                 <ChevronDown className="w-4 h-4 text-gray-500" />

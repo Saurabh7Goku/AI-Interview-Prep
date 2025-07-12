@@ -153,7 +153,17 @@ export default function Home() {
           {/* Navigation Links */}
           <nav className="space-y-4">
             <button
-              onClick={() => router.push("/homeform")}
+              onClick={() => {
+                // Clear stale data first
+                localStorage.removeItem("questions");
+                localStorage.removeItem("userAnswers");
+                localStorage.removeItem("feedbacks");
+                localStorage.removeItem("scores");
+                localStorage.removeItem("currentQuestionIndex");
+
+                // Then navigate to form
+                router.push("/homeform");
+              }}
               className="w-full flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
             >
               <Sparkles className="w-5 h-5" />
@@ -220,7 +230,17 @@ export default function Home() {
               View History
             </button>
             <button
-              onClick={() => router.push("/homeform")}
+              onClick={() => {
+                // Clear stale data first
+                localStorage.removeItem("questions");
+                localStorage.removeItem("userAnswers");
+                localStorage.removeItem("feedbacks");
+                localStorage.removeItem("scores");
+                localStorage.removeItem("currentQuestionIndex");
+
+                // Then navigate to form
+                router.push("/homeform");
+              }}
               className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               Get Started
@@ -273,7 +293,17 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
-              onClick={() => handleNavigation("/homeform")}
+              onClick={() => {
+                // Clear stale data first
+                localStorage.removeItem("questions");
+                localStorage.removeItem("userAnswers");
+                localStorage.removeItem("feedbacks");
+                localStorage.removeItem("scores");
+                localStorage.removeItem("currentQuestionIndex");
+                showToast("✅ Local storage cleared!", "success");
+                // Then navigate to form
+                router.push("/homeform");
+              }}
               className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center space-x-2"
             >
               <span>Start Preparing Now</span>
@@ -380,7 +410,7 @@ export default function Home() {
               Join thousands of successful candidates who prepared with InterviewPrep AI
             </p>
             <button
-              onClick={() => handleNavigation("/homeform")}
+              onClick={() => router.push("/homeform")}
               className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center space-x-2 mx-auto"
             >
               <Sparkles className="w-5 h-5" />
@@ -408,6 +438,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </div>
+    </div >
   );
 }
