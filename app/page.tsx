@@ -1,8 +1,10 @@
 "use client";
 import { useState } from "react";
-import { Briefcase, Sparkles, ArrowRight, Star, Target, Brain, Award, MessageSquare, History, X, Menu, Shield, LogIn, Clock } from "lucide-react";
+import { Sparkles, ArrowRight, Star, Target, Brain, Award, MessageSquare, History, X, Menu, Shield, LogIn, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvide";
+import Image from "next/image";
+import logo from "@/public/logo.png";
 
 export default function Home() {
   const router = useRouter();
@@ -110,10 +112,8 @@ export default function Home() {
           {/* Sidebar Header */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
-                <Briefcase className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-xl font-bold text-gray-800">InterviewPrep AI</span>
+              <Image src={logo} alt="JobFlow AI Logo" className="w-12 h-12 rounded-xl flex items-center justify-center" />
+              <span className="text-xl font-bold text-gray-800">PreplystHub - AI</span>
             </div>
             <button
               onClick={() => setIsSidebarOpen(false)}
@@ -170,11 +170,9 @@ export default function Home() {
       <nav className="relative z-10 px-4 sm:px-6 py-4 bg-transparent backdrop-blur-sm border-b border-blue-100 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
-              <Briefcase className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-            </div>
+            <Image src={logo} alt="JobFlow AI Logo" className="md:w-16 md:h-16 w-12 h-12 rounded-xl flex items-center justify-center" />
             <span className="text-lg md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
-              InterviewPrep AI
+              PreplystHub - AI
             </span>
           </div>
 
@@ -194,18 +192,11 @@ export default function Home() {
                 localStorage.removeItem("feedbacks");
                 localStorage.removeItem("scores");
                 localStorage.removeItem("currentQuestionIndex");
-                router.push("/homeform");
+                router.push("/auth");
               }}
               className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
-              Get Started
-            </button>
-            <button
-              onClick={() => handleNavigation("/auth")}
-              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center space-x-2"
-            >
-              <LogIn className="w-4 h-4" />
-              <span>Sign Up</span>
+              Dashboard
             </button>
           </div>
 
@@ -239,14 +230,12 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
               onClick={() => {
-                // Clear stale data first
                 localStorage.removeItem("questions");
                 localStorage.removeItem("userAnswers");
                 localStorage.removeItem("feedbacks");
                 localStorage.removeItem("scores");
                 localStorage.removeItem("currentQuestionIndex");
-                showToast("✅ Local storage cleared!", "success");
-                router.push("/homeform");
+                router.push("/auth");
               }}
               className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center space-x-2"
             >
@@ -281,7 +270,7 @@ export default function Home() {
       <section className="relative z-10 px-6 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-800 mb-6">Why Choose InterviewPrep AI?</h2>
+            <h2 className="text-4xl font-bold text-gray-800 mb-6">Why Choose PreplystHub - AI?</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Our intelligent platform adapts to your needs, providing the most relevant and challenging questions.
             </p>
@@ -305,7 +294,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-800 mb-6">Success Stories</h2>
-            <p className="text-xl text-gray-600">See how others have succeeded with InterviewPrep AI</p>
+            <p className="text-xl text-gray-600">See how others have succeeded with PreplystHub - AI</p>
           </div>
           <div className="relative overflow-hidden">
             <div className="flex gap-6 animate-scroll">
@@ -351,7 +340,7 @@ export default function Home() {
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-3xl p-12 text-white shadow-2xl">
             <h2 className="text-4xl font-bold mb-6">Ready to Ace Your Interview?</h2>
             <p className="text-xl mb-8 opacity-90">
-              Join thousands of successful candidates who prepared with InterviewPrep AI
+              Join thousands of successful candidates who prepared with PreplystHub - AI
             </p>
             <button
               onClick={() => handleNavigation("/homeform")}
@@ -370,10 +359,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-                <Briefcase className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-transparent rounded-xl flex items-center justify-center">
+                <Image src={logo} alt="JobFlow AI Logo" className="w-4 h-4 sm:w-6 sm:h-6" />
               </div>
-              <span className="font-semibold text-gray-800">InterviewPrep AI</span>
+              <span className="font-semibold text-gray-800">PreplystHub - AI</span>
             </div>
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <Shield className="w-4 h-4" />

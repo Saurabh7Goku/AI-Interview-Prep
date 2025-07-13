@@ -20,7 +20,7 @@ export default function AuthPage() {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
                 showToast("✅ Successfully signed in!", "success");
-                router.push("/history");
+                router.push("/dashboard");
             }
         });
         return () => unsubscribe();
