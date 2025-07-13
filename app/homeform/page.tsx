@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Briefcase, User, ChevronDown, Sparkles, ArrowRight, Brain, Zap, Shield, Code, Database, Palette, MessageCircle, TrendingUp, Globe, Smartphone, Server, Camera, Star, Target, ListChecks, Languages, Tag, CheckCircle, Users, Award } from "lucide-react";
+import Image from "next/image";
+import logo from "@/public/logo.png"
 
 export default function HomeForm() {
     const router = useRouter();
@@ -71,13 +73,13 @@ export default function HomeForm() {
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50/30 overflow-hidden relative">
+        <div className="min-h-screen bg-black overflow-hidden relative">
             {/* Enhanced Background Elements */}
             <div className="absolute inset-0">
                 {/* Improved Gradient Orbs */}
-                <div className="absolute top-10 left-10 w-96 h-96 bg-gradient-to-r from-blue-200/30 to-indigo-200/20 rounded-full blur-3xl animate-pulse"></div>
-                <div className="absolute bottom-10 right-10 w-80 h-80 bg-gradient-to-r from-indigo-100/40 to-blue-100/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
-                <div className="absolute top-1/3 left-1/3 w-64 h-64 bg-gradient-to-r from-blue-100/25 to-indigo-100/20 rounded-full blur-3xl animate-pulse delay-2000"></div>
+                <div className="absolute top-10 left-10 w-96 h-96 bg-gradient-to-r from-blue-200/3 to-indigo-200/2 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-10 right-10 w-80 h-80 bg-gradient-to-r from-indigo-100/4 to-blue-100/2 rounded-full blur-3xl animate-pulse delay-1000"></div>
+                <div className="absolute top-1/3 left-1/3 w-64 h-64 bg-gradient-to-r from-blue-100/2 to-indigo-100/2 rounded-full blur-3xl animate-pulse delay-2000"></div>
 
                 {/* Floating Icons */}
                 {floatingElements.map((element, index) => (
@@ -104,29 +106,26 @@ export default function HomeForm() {
 
                     {/* Left Side - Enhanced Form (60% width) */}
                     <div className="lg:col-span-3 relative">
-                        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-10 relative overflow-hidden">
-
-                            {/* Form Background Pattern */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-transparent to-indigo-50/20"></div>
+                        <div className="bg-white/2  rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-10 relative overflow-hidden">
 
                             {/* Floating Accent */}
                             <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-full blur-xl"></div>
 
                             {/* Enhanced Form Header */}
                             <div className="text-center mb-8 relative z-10">
-                                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl mb-6 shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300">
-                                    <Briefcase className="w-10 h-10 text-white" />
-                                </div>
-                                <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-3">
+                                {/* <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl mb-6 shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300"> */}
+                                <Image src={logo} alt="PreplystHub - AI Logo" className="w-12 h-12 md:h-14 md:w-14 inline-flex items-center rounded-xl flex items-center justify-center" />
+                                {/* </div> */}
+                                <h2 className="text-3xl lg:text-4xl font-bold text-gray-300 mb-3">
                                     Start Your
                                     <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"> Practice</span>
                                 </h2>
-                                <p className="text-gray-600 text-lg">Generate personalized interview questions tailored for you</p>
+                                <p className="text-gray-400 text-lg">Generate personalized interview questions tailored for you</p>
 
                                 {/* Feature Pills */}
                                 <div className="flex flex-wrap justify-center gap-2 mt-4">
                                     {features.map((feature, index) => (
-                                        <div key={index} className="flex items-center space-x-2 bg-blue-50/50 text-blue-700 px-3 py-1 rounded-full text-sm">
+                                        <div key={index} className="flex items-center space-x-2 bg-white/10 text-blue-700 px-3 py-1 rounded-full text-sm">
                                             <feature.icon className="w-3 h-3" />
                                             <span>{feature.text}</span>
                                         </div>
@@ -141,9 +140,9 @@ export default function HomeForm() {
 
                                     {/* Job Profile */}
                                     <div className="lg:col-span-2 space-y-2">
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                        <label className="flex items-center text-sm font-semibold text-gray-300 mb-2">
                                             <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
-                                                <Briefcase className="w-3 h-3 text-blue-600" />
+                                                <Briefcase className="w-4 h-4 text-blue-600" />
                                             </div>
                                             Job Profile
                                         </label>
@@ -153,15 +152,15 @@ export default function HomeForm() {
                                             onChange={(e) => setJobProfile(e.target.value)}
                                             placeholder="e.g., Frontend Developer, Data Scientist, Product Manager"
                                             required
-                                            className="w-full px-4 py-4 bg-white/80 border border-gray-200 rounded-2xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300 text-gray-800 placeholder-gray-500"
+                                            className="w-full px-4 py-4  bg-white/10 border border-gray-200 rounded-2xl focus:border-blue-500 focus:bg-white/20 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300 text-gray-200 placeholder-gray-300"
                                         />
                                     </div>
 
                                     {/* Experience Level */}
                                     <div className="space-y-2">
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                        <label className="flex items-center text-sm font-semibold text-gray-300 mb-2">
                                             <div className="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center mr-2">
-                                                <User className="w-3 h-3 text-green-600" />
+                                                <User className="w-4 h-4 text-green-600" />
                                             </div>
                                             Experience Level
                                         </label>
@@ -169,24 +168,21 @@ export default function HomeForm() {
                                             <select
                                                 value={experienceLevel}
                                                 onChange={(e) => setExperienceLevel(e.target.value)}
-                                                className="w-full px-4 py-4 bg-white/80 border border-gray-200 rounded-2xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none appearance-none transition-all duration-300 text-gray-800"
+                                                className="w-full px-4 py-4  bg-white/10 border border-gray-200 rounded-2xl focus:border-blue-500 focus:bg-black focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300 text-gray-200 placeholder-gray-300"
                                             >
                                                 <option value="Fresher">Fresher (0-1 years)</option>
                                                 <option value="Junior">Junior (1-3 years)</option>
                                                 <option value="Mid">Mid-level (3-6 years)</option>
                                                 <option value="Senior">Senior (6+ years)</option>
                                             </select>
-                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                                <ChevronDown className="w-4 h-4 text-gray-500" />
-                                            </div>
                                         </div>
                                     </div>
 
                                     {/* Interview Type */}
                                     <div className="space-y-2">
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                        <label className="flex items-center text-sm font-semibold text-gray-300 mb-2">
                                             <div className="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center mr-2">
-                                                <ListChecks className="w-3 h-3 text-purple-600" />
+                                                <ListChecks className="w-4 h-4 text-purple-600" />
                                             </div>
                                             Interview Type
                                         </label>
@@ -194,22 +190,19 @@ export default function HomeForm() {
                                             <select
                                                 value={interviewType}
                                                 onChange={(e) => setInterviewType(e.target.value)}
-                                                className="w-full px-4 py-4 bg-white/80 border border-gray-200 rounded-2xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none appearance-none transition-all duration-300 text-gray-800"
+                                                className="w-full px-4 py-4  bg-white/10 border border-gray-200 rounded-2xl focus:border-blue-500 focus:bg-black focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300 text-gray-200 placeholder-gray-300"
                                             >
                                                 <option value="Technical">Technical</option>
                                                 <option value="HR">HR / Behavioral</option>
                                                 <option value="Managerial">Managerial</option>
                                                 <option value="Mixed">Mixed</option>
                                             </select>
-                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                                <ChevronDown className="w-4 h-4 text-gray-500" />
-                                            </div>
                                         </div>
                                     </div>
 
                                     {/* Skills */}
                                     <div className="space-y-2">
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                        <label className="flex items-center text-sm font-semibold text-gray-300 mb-2">
                                             <div className="w-6 h-6 bg-orange-100 rounded-lg flex items-center justify-center mr-2">
                                                 <Tag className="w-3 h-3 text-orange-600" />
                                             </div>
@@ -220,13 +213,13 @@ export default function HomeForm() {
                                             value={skills}
                                             onChange={(e) => setSkills(e.target.value)}
                                             placeholder="e.g., React, SQL, Python, Leadership"
-                                            className="w-full px-4 py-4 bg-white/80 border border-gray-200 rounded-2xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300 text-gray-800 placeholder-gray-500"
+                                            className="w-full px-4 py-4  bg-white/10 border border-gray-200 rounded-2xl focus:border-blue-500 focus:bg-black focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300 text-gray-200 placeholder-gray-300"
                                         />
                                     </div>
 
                                     {/* Language */}
                                     <div className="space-y-2">
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                        <label className="flex items-center text-sm font-semibold text-gray-300 mb-2">
                                             <div className="w-6 h-6 bg-pink-100 rounded-lg flex items-center justify-center mr-2">
                                                 <Languages className="w-3 h-3 text-pink-600" />
                                             </div>
@@ -236,21 +229,18 @@ export default function HomeForm() {
                                             <select
                                                 value={language}
                                                 onChange={(e) => setLanguage(e.target.value)}
-                                                className="w-full px-4 py-4 bg-white/80 border border-gray-200 rounded-2xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none appearance-none transition-all duration-300 text-gray-800"
+                                                className="w-full px-4 py-4  bg-white/10 border border-gray-200 rounded-2xl focus:border-blue-500 focus:bg-black focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300 text-gray-200 placeholder-gray-300"
                                             >
                                                 <option value="English">English</option>
                                                 <option value="Hindi">Hindi</option>
                                                 <option value="Bilingual">Bilingual</option>
                                             </select>
-                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                                <ChevronDown className="w-4 h-4 text-gray-500" />
-                                            </div>
                                         </div>
                                     </div>
 
                                     {/* Target Company */}
                                     <div className="space-y-2">
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                        <label className="flex items-center text-sm font-semibold text-gray-300 mb-2">
                                             <div className="w-6 h-6 bg-indigo-100 rounded-lg flex items-center justify-center mr-2">
                                                 <Target className="w-3 h-3 text-indigo-600" />
                                             </div>
@@ -262,13 +252,13 @@ export default function HomeForm() {
                                             value={targetCompany}
                                             onChange={(e) => setTargetCompany(e.target.value)}
                                             placeholder="e.g., Google, Microsoft, Amazon"
-                                            className="w-full px-4 py-4 bg-white/80 border border-gray-200 rounded-2xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300 text-gray-800 placeholder-gray-500"
+                                            className="w-full px-4 py-4  bg-white/10 border border-gray-200 rounded-2xl focus:border-blue-500 focus:bg-white/20 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300 text-gray-200 placeholder-gray-300"
                                         />
                                     </div>
 
                                     {/* Focus Topics */}
                                     <div className="space-y-2">
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                        <label className="flex items-center text-sm font-semibold text-gray-300 mb-2">
                                             <div className="w-6 h-6 bg-cyan-100 rounded-lg flex items-center justify-center mr-2">
                                                 <ListChecks className="w-3 h-3 text-cyan-600" />
                                             </div>
@@ -280,7 +270,7 @@ export default function HomeForm() {
                                             value={focusTopics}
                                             onChange={(e) => setFocusTopics(e.target.value)}
                                             placeholder="e.g., System Design, Data Structures, Algorithms"
-                                            className="w-full px-4 py-4 bg-white/80 border border-gray-200 rounded-2xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300 text-gray-800 placeholder-gray-500"
+                                            className="w-full px-4 py-4  bg-white/10 border border-gray-200 rounded-2xl focus:border-blue-500 focus:bg-white/20 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300 text-gray-200 placeholder-gray-300"
                                         />
                                     </div>
                                 </div>
@@ -317,10 +307,10 @@ export default function HomeForm() {
                                         Ace Your
                                     </span>
                                     <br />
-                                    <span className="text-gray-800">Next Interview</span>
+                                    <span className="text-gray-300">Next Interview</span>
                                 </h1>
 
-                                <p className="text-lg text-gray-600 leading-relaxed">
+                                <p className="text-lg text-gray-400 leading-relaxed">
                                     Get personalized mock interview questions tailored to your role and experience level.
                                     Practice with confidence and land your dream job.
                                 </p>
@@ -329,22 +319,22 @@ export default function HomeForm() {
 
                         {/* Enhanced Job Categories */}
                         <div className="space-y-4">
-                            <h3 className="text-xl font-semibold text-gray-800 flex items-center">
+                            <h3 className="text-xl font-semibold text-gray-300 flex items-center">
                                 <Star className="w-5 h-5 text-yellow-500 mr-2" />
                                 Popular Categories
                             </h3>
                             <div className="grid grid-cols-1 gap-3">
                                 {jobCategories.slice(0, 4).map((category, index) => (
-                                    <div key={index} className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200 hover:bg-white hover:shadow-lg transition-all duration-300 group cursor-pointer">
+                                    <div key={index} className="bg-white/2 rounded-xl p-4 hover:bg-white/20 hover:shadow-lg transition-all duration-300 group cursor-pointer">
                                         <div className="flex items-center space-x-3">
                                             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                                                 <category.icon className="w-5 h-5 text-white" />
                                             </div>
                                             <div className="flex-1">
-                                                <h4 className="font-semibold text-gray-800">{category.title}</h4>
+                                                <h4 className="font-semibold text-blue-600">{category.title}</h4>
                                                 <div className="flex flex-wrap gap-1 mt-1">
-                                                    {category.roles.slice(0, 2).map((role, roleIndex) => (
-                                                        <span key={roleIndex} className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">
+                                                    {category.roles.slice(0, 3).map((role, roleIndex) => (
+                                                        <span key={roleIndex} className="text-xs bg-white/30 text-white px-2 py-1 rounded-full">
                                                             {role}
                                                         </span>
                                                     ))}
@@ -362,7 +352,7 @@ export default function HomeForm() {
                         </div>
 
                         {/* Enhanced Success Stats */}
-                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+                        <div className="bg-white/2 rounded-2xl p-6 border border-blue-100">
                             <div className="grid grid-cols-3 gap-4 text-center">
                                 <div className="space-y-1">
                                     <div className="text-2xl font-bold text-blue-600">10K+</div>

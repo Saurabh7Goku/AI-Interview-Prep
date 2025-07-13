@@ -66,7 +66,7 @@ export default function ResultsSummary({
                                 {/* Feedback */}
                                 <div className="mb-3">
                                     <strong className="text-gray-300">Feedback:</strong>
-                                    <div className="prose max-w-full break-words overflow-x-auto">
+                                    <div className="text-white prose max-w-full break-words overflow-x-auto">
                                         <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
                                             {feedback || "No feedback available."}
                                         </ReactMarkdown>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Search, FileText, Home, History, LogIn, Users, X, TargetIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import logo from '@/public/logo.png';
 
@@ -11,6 +11,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) => {
     const router = useRouter();
+    const pathname = usePathname(); // ✅ get current path
 
     const sidebarItems: {
         name: string;
@@ -21,12 +22,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
             { name: 'Dashboard', icon: Home, path: '/dashboard' },
             { name: 'ATS Scan', icon: FileText, path: '/subscription' },
             { name: 'Job Finder', icon: Search, path: '/subscription' },
-            { name: 'Mock Interview', icon: Users, path: '/mock-interview' },
+            { name: 'Mock Interview', icon: Users, path: '/homeform' },
             { name: 'History', icon: History, path: '/history' },
             { name: 'Premium', icon: TargetIcon, path: '/subscription' },
             { name: 'Log Out', icon: LogIn, action: 'logout' },
         ];
-
 
     return (
         <div className={`fixed top-0 left-0 h-full bg-black/98 w-64 shadow-xl transform transition-transform duration-300 ease-in-out z-50 lg:static lg:shadow-none lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
@@ -49,28 +49,33 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
 
                 {/* Navigation */}
                 <nav className="flex-1 px-4 py-6 space-y-2">
-                    {sidebarItems.map((item) => (
-                        <button
-                            key={item.name}
-                            onClick={() => {
-                                setIsSidebarOpen(false);
-                                if (item.action === 'logout') {
-                                    localStorage.clear();
-                                    router.push('/');
-                                } else if (item.path) {
-                                    router.push(item.path);
-                                }
-                            }}
-                            className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-200 ${item.name === 'Dashboard'
-                                ? 'bg-blue-600 text-white shadow-sm'
-                                : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                                }`}
-                        >
-                            <item.icon className="w-5 h-5 mr-3" />
-                            <span className="font-medium">{item.name}</span>
-                        </button>
-                    ))}
+                    {sidebarItems.map((item) => {
+                        // Determine if this item is active
+                        const isActive = item.path && pathname.startsWith(item.path);
 
+                        return (
+                            <button
+                                key={item.name}
+                                onClick={() => {
+                                    setIsSidebarOpen(false);
+                                    if (item.action === 'logout') {
+                                        localStorage.clear();
+                                        router.push('/');
+                                    } else if (item.path) {
+                                        router.push(item.path);
+                                    }
+                                }}
+                                className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-200 
+                                    ${isActive
+                                        ? 'bg-blue-600 text-white shadow-sm'
+                                        : 'text-gray-300 hover:bg-gray-700 hover:text-white'}
+                                `}
+                            >
+                                <item.icon className="w-5 h-5 mr-3" />
+                                <span className="font-medium">{item.name}</span>
+                            </button>
+                        );
+                    })}
                 </nav>
 
                 {/* Sidebar Footer */}

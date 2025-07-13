@@ -48,14 +48,14 @@ export default function InterviewQuestion({
     };
 
     return (
-        <div className="bg-white p-6 rounded shadow max-w-2xl mx-auto">
-            <p className="text-sm text-gray-500 mb-2">Q{index} of {total}</p>
-            <h2 className="text-sm md:text-lg font-medium mb-4">{question}</h2>
+        <div className="bg-black/5 p-6 rounded shadow max-w-2xl mx-auto">
+            <p className="text-sm text-gray-300 mb-2">Q{index} of {total}</p>
+            <h2 className="text-sm md:text-lg font-medium mb-4 text-white">{question}</h2>
 
             {/* Show Code Editor if it's a code question */}
             {isCodeQuestion ? (
                 <div className="mt-4">
-                    <label className="block text-sm font-medium mb-2">Write your code here:</label>
+                    <label className="block text-sm text-blue-700 font-medium mb-2">Write your code here:</label>
                     <CodeEditor
                         value={codeAnswer}
                         height="250px"
@@ -70,7 +70,7 @@ export default function InterviewQuestion({
                     <button
                         type="button"
                         onClick={isListening ? stopListening : startListening}
-                        className={`px-3 py-1 md:px-6 md:py-2 rounded ${isListening ? "bg-red-500" : "bg-green-500"} text-white`}
+                        className={`px-3 py-1 md:px-6 md:py-2 rounded ${isListening ? "bg-red-500" : "bg-green-700"} text-white`}
                     >
                         {isListening ? "Stop Talking" : "Start Talking"}
                     </button>

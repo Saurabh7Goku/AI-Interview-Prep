@@ -57,28 +57,33 @@ export async function saveInterview(userId: string, interviewData: {
 }
 
 export async function getInterviewHistory(userId: string): Promise<Interview[]> {
-    try {
-      const q = query(collection(db, "interviews"), where("userId", "==", userId));
-      const querySnapshot = await getDocs(q);
-      const interviews: Interview[] = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        userId: doc.data().userId || "",
-        questions: doc.data().questions || [],
-        answers: doc.data().answers || {},
-        feedbacks: doc.data().feedbacks || {},
-        scores: doc.data().scores || {},
-        interviewType: doc.data().interviewType,
-        interviewRole: doc.data().interviewRole,
-        skills: doc.data().skills,
-        createdAt: doc.data().createdAt ? (doc.data().createdAt instanceof Timestamp ? doc.data().createdAt.toDate().toISOString() : doc.data().createdAt) : "",
-        timestamp: doc.data().timestamp || "",
-      }));
-      console.log("Fetched interviews:", interviews);
-      return interviews;
-    } catch (error) {
-      console.error("Error fetching interview history:", error);
-      throw error;
-    }
+  try {
+    const q = query(collection(db, "users", userId, "interviews"));
+    const querySnapshot = await getDocs(q);
+    const interviews: Interview[] = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      userId: userId,
+      questions: doc.data().questions || [],
+      answers: doc.data().answers || {},
+      feedbacks: doc.data().feedbacks || {},
+      scores: doc.data().scores || {},
+      interviewType: doc.data().interviewType,
+      interviewRole: doc.data().interviewRole,
+      skills: doc.data().skills,
+      createdAt: doc.data().createdAt ? 
+        (doc.data().createdAt instanceof Timestamp
+            ? doc.data().createdAt.toDate().toISOString()
+            : doc.data().createdAt)
+        : "",
+      timestamp: doc.data().timestamp || "",
+    }));
+    console.log("Fetched interviews:", interviews);
+    return interviews;
+  } catch (error) {
+    console.error("Error fetching interview history:", error);
+    throw error;
+  }
 }
+
 
 export{signOut, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword};
