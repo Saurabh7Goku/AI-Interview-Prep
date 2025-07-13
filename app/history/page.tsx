@@ -44,9 +44,9 @@ export default function HistoryPage() {
     }, []);
 
     useEffect(() => {
-        const fetchHistory = async () => {
-            const user = auth.currentUser;
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
             console.log("History page user:", user ? `User ${user.uid} ` : "No user");
+
             if (!user) {
                 showToast("❌ Please sign in to view history.", "error");
                 router.push("/auth");
@@ -67,10 +67,11 @@ export default function HistoryPage() {
             } finally {
                 setIsLoadingAuth(false);
             }
-        };
+        });
 
-        fetchHistory();
+        return () => unsubscribe();
     }, [router, showToast]);
+
 
     const getAvgScore = (scores: { [key: number]: number }) => {
         const values = Object.values(scores);
@@ -181,7 +182,7 @@ export default function HistoryPage() {
                                 return (
                                     <div
                                         key={interview.id}
-                                        className={`group relative bg-white/2 backdrop-blur-xl rounded-2xl overflow-hidden border transition-all duration-300 cursor-pointer transform hover:-translate-y-2 hover:shadow-2xl ${isSelected
+                                        className={`group relative bg-white/10 md:bg-white/2 backdrop-blur-xl rounded-2xl overflow-hidden border transition-all duration-300 cursor-pointer transform hover:-translate-y-2 hover:shadow-2xl ${isSelected
                                             ? 'ring-2 ring-blue-500/50 shadow-blue-500/20 shadow-2xl border-blue-500/30'
                                             : 'hover:border-gray-600/50 hover:bg-gray-800/70'
                                             }`}
@@ -274,7 +275,7 @@ export default function HistoryPage() {
             {/* Detailed Analysis Modal/Panel */}
             {selectedInterview && (
                 <div className="fixed inset-0 bg-black backdrop-blur-sm z-50 flex items-center justify-center p-4 md:hidden">
-                    <div className="bg-white/2 backdrop-blur-xl rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+                    <div className="bg-white/10 md:bg-white/2 backdrop-blur-xl rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
                         <div className="p-6 bg-red">
                             <div className="flex items-center justify-between overflow-hidden">
                                 <h2 className="text-xl font-bold text-gray-300">Detailed Interview Analysis</h2>
@@ -331,7 +332,7 @@ export default function HistoryPage() {
             {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:block"
                     onClick={() => setIsSidebarOpen(false)}
                 />
             )}

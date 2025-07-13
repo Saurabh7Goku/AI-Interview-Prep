@@ -123,26 +123,12 @@ export default function SubscriptionPage() {
 
     return (
         <div className="flex min-h-screen bg-black">
-            {/* Mobile Sidebar Overlay */}
-            {isSidebarOpen && (
-                <div
-                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
-                    onClick={() => setIsSidebarOpen(false)}
-                />
-            )}
-
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden min-w-0">
                 {/* Header */}
                 <header className="bg-transparent backdrop-blur-xl shadow-sm">
                     <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
                         <div className="flex items-center space-x-3 sm:space-x-4">
-                            <button
-                                onClick={() => setIsSidebarOpen(true)}
-                                className="lg:hidden text-gray-400 hover:text-white transition-colors"
-                            >
-                                <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
-                            </button>
                             <div>
                                 <h1 className="text-base sm:text-xl font-bold text-blue-700">Subscription Plans</h1>
                                 <p className="hidden sm:block text-gray-300 text-xs sm:text-sm">Choose the plan that best fits your career goals</p>

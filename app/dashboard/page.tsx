@@ -274,11 +274,11 @@ const Dashboard = () => {
                             </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                            <button className="hidden sm:flex items-center space-x-2 px-4 py-2 rounded-lg bg-white/2 text-gray-300 hover:bg-gray-600 transition-colors">
+                            <button className="hidden sm:flex items-center space-x-2 px-4 py-2 rounded-lg bg-white/10 md:bg-white/2 text-gray-300 hover:bg-gray-600 transition-colors">
                                 <Filter className="w-4 h-4" />
                                 <span>Filter</span>
                             </button>
-                            <button className="hidden sm:flex items-center space-x-2 px-4 py-2 rounded-lg bg-white/2 text-gray-300 hover:bg-gray-600 transition-colors">
+                            <button className="hidden sm:flex items-center space-x-2 px-4 py-2 rounded-lg bg-white/10 md:bg-white/2 text-gray-300 hover:bg-gray-600 transition-colors">
                                 <Download className="w-4 h-4" />
                                 <span>Export</span>
                             </button>
@@ -292,9 +292,9 @@ const Dashboard = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
                         {/* Service Cards - 2x2 Grid */}
                         <div className="lg:col-span-2">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
                                 {services.map((service, index) => (
-                                    <div key={index} className="bg-white/2 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                                    <div key={index} className="bg-white/10 md:bg-white/2 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
                                         <div className="flex items-center justify-between mb-4">
                                             <div className={`w-12 h-12 ${service.color} rounded-xl flex items-center justify-center`}>
                                                 <service.icon className="w-6 h-6 text-white" />
@@ -314,7 +314,7 @@ const Dashboard = () => {
                         </div>
 
                         {/* Interview Details Table */}
-                        <div className="lg:col-span-2 bg-white/2 p-6 rounded-xl shadow-sm">
+                        <div className="lg:col-span-2 bg-white/10 md:bg-white/2 p-6 rounded-xl shadow-sm">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-lg font-semibold text-white">Recent Interviews</h3>
                                 <select className="px-3 py-2 rounded-lg bg-gray-900 text-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
@@ -378,7 +378,7 @@ const Dashboard = () => {
 
                     {/* Bottom Section with Pie Chart */}
                     <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
-                        <div className="xl:col-span-2 bg-white/2 p-6 rounded-xl shadow-sm">
+                        <div className="xl:col-span-2 bg-white/10 md:bg-white/2 p-6 rounded-xl shadow-sm">
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
                                 <h3 className="text-lg font-semibold text-gray-300 mb-2 sm:mb-0">Interview Performance</h3>
                                 <select
@@ -434,7 +434,7 @@ const Dashboard = () => {
                             </div>
                         </div>
 
-                        <div className="bg-white/2 p-6 rounded-xl shadow-sm">
+                        <div className="bg-white/10 md:bg-white/2 p-6 rounded-xl shadow-sm">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-lg font-semibold text-white">Score Distribution</h3>
                                 <select className="px-3 py-2 rounded-lg bg-gray-900 text-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
