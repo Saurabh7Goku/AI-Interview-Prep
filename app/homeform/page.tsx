@@ -34,7 +34,7 @@ export default function HomeForm() {
                 }),
             });
             const data = await res.json();
-            // Store questions, interviewType, and jobProfile (as interviewRole) in localStorage
+            
             localStorage.setItem("questions", JSON.stringify(data.questions));
             localStorage.setItem("currentQuestionIndex", "0");
             localStorage.setItem("interviewType", interviewType);

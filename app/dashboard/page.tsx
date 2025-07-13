@@ -223,7 +223,7 @@ const Dashboard = () => {
     ];
 
     const services = [
-        { title: 'ATS Resume Scan', value: 'Scan your resume', change: 'Optimize now', icon: FileText, color: 'bg-blue-600', action: 'premium' },
+        { title: 'ATS Scan', value: 'Scan your resume', change: 'Optimize now', icon: FileText, color: 'bg-blue-600', action: 'premium' },
         { title: 'Resume Builder', value: 'Build resume', change: 'Create now', icon: FileText, color: 'bg-blue-700', action: 'premium' },
         { title: 'Job Search', value: 'Find jobs', change: 'Search now', icon: Briefcase, color: 'bg-blue-600', action: 'premium' },
         { title: 'Interview Prep', value: 'Practice now', change: 'Start prep', icon: Users, color: 'bg-blue-700', action: 'homeform' },
@@ -236,7 +236,10 @@ const Dashboard = () => {
             localStorage.removeItem("feedbacks");
             localStorage.removeItem("scores");
             localStorage.removeItem("currentQuestionIndex");
-            showToast("✅ Local storage cleared!", "success");
+            localStorage.removeItem("interviewRole");
+            localStorage.removeItem("interviewType")
+            localStorage.removeItem('skills')
+            showToast("Fill Out the Form", "success");
             router.push('/homeform');
         } else {
             setShowPremiumPopup(true);
@@ -327,29 +330,28 @@ const Dashboard = () => {
                                 <table className="w-full text-sm">
                                     <thead>
                                         <tr className="border-b border-gray-700">
-                                            <th className="text-left py-3 px-2 text-gray-300 font-medium">Type</th>
-                                            <th className="text-left py-3 px-2 text-gray-300 font-medium">Role</th>
-                                            <th className="text-left py-3 px-2 text-gray-300 font-medium">Score</th>
-                                            <th className="text-left py-3 px-2 text-gray-300 font-medium">Skills</th>
+                                            <th className="text-left py-3 px-1 text-gray-300 font-medium">Type</th>
+                                            <th className="text-left py-3 px-1 text-gray-300 font-medium">Role</th>
+                                            <th className="text-left py-3 px-1 text-gray-300 font-medium">Score</th>
+                                            <th className="text-left py-3 px-3 text-gray-300 font-medium">Skills</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {interviewData.slice(0, 10).map((interview, index) => {
                                             const scores = Object.values(interview.scores ?? {});
                                             const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-                                            const skills: string[] = Array.isArray(interview.skills)
-                                                ? interview.skills.map(String)
+                                            const skills: string[] = typeof interview.skills === "string"
+                                                ? interview.skills.split(",").map(s => s.trim()).filter(Boolean)
                                                 : [];
-
                                             return (
                                                 <tr key={index} className="hover:bg-gray-700/50 transition-colors">
-                                                    <td className="py-3 px-2 text-gray-300">
+                                                    <td className="py-3 px-1 text-gray-300 w-20 truncate">
                                                         {interview.interviewType?.slice(0, 10) || 'N/A'}
                                                     </td>
-                                                    <td className="py-3 px-2 text-gray-300">
-                                                        {interview.interviewRole?.slice(0, 15) || 'N/A'}
+                                                    <td className="py-3 px-1 text-gray-300 w-30 truncate">
+                                                        {interview.interviewRole?.slice(0, 30) || 'N/A'}
                                                     </td>
-                                                    <td className="py-3 px-2">
+                                                    <td className="py-3 px-2 w-16">
                                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${avgScore >= 8 ? 'bg-green-900 text-green-300' :
                                                             avgScore >= 6 ? 'bg-yellow-900 text-yellow-300' :
                                                                 'bg-red-900 text-red-300'
@@ -357,12 +359,13 @@ const Dashboard = () => {
                                                             {avgScore.toFixed(1)}
                                                         </span>
                                                     </td>
-                                                    <td className="py-3 px-2 text-gray-300">
-                                                        {skills.length > 0 ? skills.slice(0, 2).join(', ') : 'N/A'}
+                                                    <td className="py-3 px-2 text-gray-300 w-48 truncate">
+                                                        {skills.length > 0 ? skills.slice(0, 3).join(', ') : 'N/A'}
                                                     </td>
                                                 </tr>
                                             );
                                         })}
+
                                         {interviewData.length === 0 && (
                                             <tr>
                                                 <td colSpan={4} className="py-6 px-2 text-center text-gray-500">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, FileText, Home, History, LogIn, Users, X, TargetIcon } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
@@ -11,7 +11,8 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) => {
     const router = useRouter();
-    const pathname = usePathname(); // ✅ get current path
+    const pathname = usePathname();
+    const [showPremiumPopup, setShowPremiumPopup] = useState(false);
 
     const sidebarItems: {
         name: string;
@@ -20,16 +21,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
         action?: string;
     }[] = [
             { name: 'Dashboard', icon: Home, path: '/dashboard' },
-            { name: 'ATS Scan', icon: FileText, path: '/subscription' },
-            { name: 'Job Finder', icon: Search, path: '/subscription' },
+            { name: 'ATS Scan', icon: FileText, action: 'subscription' },
+            { name: 'Job Finder', icon: Search, action: 'subscription' },
             { name: 'Mock Interview', icon: Users, path: '/homeform' },
             { name: 'History', icon: History, path: '/history' },
-            { name: 'Premium', icon: TargetIcon, path: '/subscription' },
+            { name: 'Premium', icon: TargetIcon, action: 'subscription' },
             { name: 'Log Out', icon: LogIn, action: 'logout' },
         ];
 
     return (
-        <div className={`fixed top-0 left-0 h-full bg-black/98 w-64 shadow-xl transform transition-transform duration-300 ease-in-out z-50 lg:static lg:shadow-none lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className={`fixed top-0 left-0 h-full bg-black/98 w-80 sm:w-64 shadow-xl transform transition-transform duration-300 ease-in-out z-50 lg:static lg:shadow-none lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
             <div className="flex flex-col h-full">
                 {/* Sidebar Header */}
                 <div className="px-5 py-5 border-b border-gray-700">
@@ -61,7 +62,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
                                     if (item.action === 'logout') {
                                         localStorage.clear();
                                         router.push('/');
-                                    } else if (item.path) {
+                                    } if (item.action === 'subscription') {
+                                        setShowPremiumPopup(true);
+                                    }
+                                    else if (item.path) {
                                         router.push(item.path);
                                     }
                                 }}
@@ -93,6 +97,31 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
                     </div>
                 </div>
             </div>
+            {/* Premium Popup */}
+            {showPremiumPopup && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-700">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-bold text-white">Unlock Premium Features</h2>
+                            <button
+                                onClick={() => setShowPremiumPopup(false)}
+                                className="text-gray-400 hover:text-gray-300 transition-colors p-2 hover:bg-gray-700 rounded-lg"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <p className="text-gray-300 mb-6">
+                            Access ATS Resume Scan, Resume Builder, and Job Search with our Premium Membership.
+                        </p>
+                        <button
+                            onClick={() => router.push('/subscription')}
+                            className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-sm"
+                        >
+                            Get Premium
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

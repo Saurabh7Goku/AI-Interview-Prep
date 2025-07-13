@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvide";
 import Image from "next/image";
 import logo from "@/public/logo.png";
+import Sidebar from "@/components/Sidebar";
 
 export default function Home() {
   const router = useRouter();
@@ -101,70 +102,15 @@ export default function Home() {
       {/* Sidebar Overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/98 bg-opacity-50 z-40 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
-      {/* Mobile Sidebar */}
-      <div className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 md:hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="p-6">
-          {/* Sidebar Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-3">
-              <Image src={logo} alt="JobFlow AI Logo" className="w-12 h-12 rounded-xl flex items-center justify-center" />
-              <span className="text-xl font-bold text-gray-800">PreplystHub - AI</span>
-            </div>
-            <button
-              onClick={() => setIsSidebarOpen(false)}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <X className="w-6 h-6 text-gray-600" />
-            </button>
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="space-y-4">
-            <button
-              onClick={() => {
-                // Clear stale data first
-                localStorage.removeItem("questions");
-                localStorage.removeItem("userAnswers");
-                localStorage.removeItem("feedbacks");
-                localStorage.removeItem("scores");
-                localStorage.removeItem("currentQuestionIndex");
-                router.push("/homeform");
-              }}
-              className="w-full flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
-            >
-              <Sparkles className="w-5 h-5" />
-              <span>Get Started</span>
-            </button>
-            <button
-              onClick={() => handleNavigation("/history")}
-              className="w-full flex items-center space-x-3 px-4 py-3 bg-blue-50 text-blue-600 font-semibold rounded-xl hover:bg-blue-100 transition-all duration-300"
-            >
-              <History className="w-5 h-5" />
-              <span>View History</span>
-            </button>
-            <button
-              onClick={() => handleNavigation("/auth")}
-              className="w-full flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
-            >
-              <LogIn className="w-5 h-5" />
-              <span>Sign Up</span>
-            </button>
-          </nav>
-
-          {/* Sidebar Footer */}
-          <div className="absolute bottom-6 left-6 right-6">
-            <div className="flex items-center space-x-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-              <Shield className="w-4 h-4" />
-              <span>Powered by AI • Secure & Private</span>
-            </div>
-          </div>
-        </div>
+      <div className="md:hidden">
+        <Sidebar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
       </div>
+
 
       {/* Navigation */}
       <nav className="relative z-10 px-4 sm:px-6 py-4 bg-transparent shadow-sm">
@@ -191,8 +137,11 @@ export default function Home() {
                 localStorage.removeItem("userAnswers");
                 localStorage.removeItem("feedbacks");
                 localStorage.removeItem("scores");
+                localStorage.removeItem("interviewRole");
+                localStorage.removeItem("interviewType");
+                localStorage.removeItem("skills");
                 localStorage.removeItem("currentQuestionIndex");
-                router.push("/auth");
+                router.push("/dashboard");
               }}
               className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
@@ -211,6 +160,9 @@ export default function Home() {
           </div>
         </div>
       </nav>
+      <div className="absolute top-1/2 left-1/100 w-66 h-66 rounded-full pointer-events-none bg-blue-700 opacity-30 blur-3xl"></div>
+      <div className="absolute top-0 right-1/100 w-66 h-66 rounded-full pointer-events-none bg-blue-700 opacity-30 blur-3xl"></div>
+
 
       {/* Hero Section */}
       <section className="relative z-10 px-6 py-20">
@@ -360,11 +312,10 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Image src={logo} alt="JobFlow AI Logo" className="w-12 h-12 md:w-18 md:h-18 rounded-xl flex items-center justify-center" />
-              <span className="font-semibold text-gray-300">PreplystHub - AI</span>
             </div>
-            <div className="flex items-center space-x-2 text-sm text-gray-300">
-              <Shield className="w-4 h-4" />
-              <span>Powered by AI • Secure & Private</span>
+            <div className="flex items-center space-x-2 text-xs text-gray-300">
+              <Shield className="w-6 h-6" />
+              <span>Powered by Firebase • Secure & Private</span>
             </div>
           </div>
         </div>

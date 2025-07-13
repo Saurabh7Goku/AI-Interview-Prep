@@ -42,11 +42,11 @@ export default function SubscriptionPage() {
                 { name: 'Mock Interviews', value: 'Unlimited sessions', included: true },
                 { name: 'Interview History', value: 'Complete history & analytics', included: true },
                 { name: 'Advanced Analysis', value: 'AI-powered insights & feedback', included: true },
-                { name: 'ATS Resume Scan', value: 'Unlimited scans', included: true },
+                { name: 'ATS Resume Scan', value: '50 scans per day', included: true },
                 { name: 'Resume Builder', value: 'Premium templates & optimization', included: true },
                 { name: 'Job Search AI', value: 'Smart matching & recommendations', included: true },
-                { name: 'AI Agents', value: 'Basic automation features', included: true },
-                { name: 'Priority Support', value: 'Email & chat support', included: true }
+                { name: 'AI Agents', value: 'Basic automation features', included: false },
+                { name: 'Priority Support', value: 'Email & chat support', included: false }
             ]
         },
         {
@@ -160,7 +160,7 @@ export default function SubscriptionPage() {
                             Choose Your
                             <span className="bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent"> Success Plan</span>
                         </h2>
-                        <p className="text-base sm:text-lg lg:text-xl text-gray-700 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed">
+                        <p className="text-base sm:text-lg lg:text-xl text-gray-400 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed">
                             Transform your interview performance with AI-powered practice, personalized feedback, and professional guidance
                         </p>
 
@@ -277,7 +277,7 @@ export default function SubscriptionPage() {
                     </div>
 
                     {/* Features Section */}
-                    <div className="bg-white/2 backdrop-blur-sm rounded-3xl p-8 sm:p-12 mb-12 sm:mb-16 shadow-xl">
+                    <div className="bg-white/10 md:bg-white/2 backdrop-blur-sm rounded-3xl p-8 sm:p-12 mb-12 sm:mb-16 shadow-xl">
                         <div className="text-center mb-8 sm:mb-12">
                             <h3 className="text-2xl sm:text-3xl font-bold text-gray-300 mb-3 sm:mb-4">Why Choose Interview Pro?</h3>
                             <p className="text-sm sm:text-lg text-gray-300 max-w-2xl mx-auto">
@@ -298,22 +298,22 @@ export default function SubscriptionPage() {
                     </div>
 
                     {/* Social Proof */}
-                    <div className="bg-white/2 backdrop-blur-sm rounded-3xl p-8 sm:p-12 mb-12 sm:mb-16 shadow-xl">
+                    <div className="bg-white/10 md:bg-white/2 backdrop-blur-sm rounded-3xl p-8 sm:p-12 mb-12 sm:mb-16 shadow-xl">
                         <div className="text-center mb-8 sm:mb-12">
                             <h3 className="text-2xl sm:text-3xl font-bold text-gray-300 mb-3 sm:mb-4">
                                 Trusted by Professionals Worldwide
                             </h3>
-                            <div className="flex justify-center mb-8 sm:mb-12">
-                                <div className="inline-flex flex-col sm:flex-row bg-white/4 rounded-lg px-4 py-2 space-y-4 sm:space-y-0 sm:space-x-6">
-                                    <div className="text-center">
+                            <div className="flex justify-center mb-8 sm:mb-6">
+                                <div className="w-1/1.5 inline-flex flex-row bg-white/10 rounded-lg px-2 md:px-6 py-2 space-y-4 sm:space-y-2 sm:space-x-2">
+                                    <div className="text-center px-4">
                                         <div className="text-2xl sm:text-3xl font-bold text-blue-600">95%</div>
                                         <div className="text-xs sm:text-sm text-gray-300">Success Rate</div>
                                     </div>
-                                    <div className="text-center">
+                                    <div className="text-center px-4">
                                         <div className="text-2xl sm:text-3xl font-bold text-blue-600">10K+</div>
                                         <div className="text-xs sm:text-sm text-gray-300">Happy Users</div>
                                     </div>
-                                    <div className="text-center">
+                                    <div className="text-center px-4">
                                         <div className="text-2xl sm:text-3xl font-bold text-blue-600">500+</div>
                                         <div className="text-xs sm:text-sm text-gray-300">Companies</div>
                                     </div>
@@ -324,7 +324,7 @@ export default function SubscriptionPage() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                             {testimonials.map((testimonial, index) => (
-                                <div key={index} className="bg-white/2 rounded-2xl p-4 sm:p-6">
+                                <div key={index} className="bg-white/10 sm:bg-white/2 rounded-2xl p-4 sm:p-6">
                                     <div className="flex items-center mb-3 sm:mb-4">
                                         {[...Array(testimonial.rating)].map((_, i) => (
                                             <Star key={i} className="text-yellow-500 fill-current" size={14} />
@@ -341,7 +341,7 @@ export default function SubscriptionPage() {
                     </div>
 
                     {/* Final CTA */}
-                    <div className="text-center bg-white/2 text-white rounded-3xl p-8 sm:p-12 shadow-2xl">
+                    <div className="text-center bg-white/10 md:bg-white/2 text-white rounded-3xl p-8 sm:p-12 shadow-2xl">
                         <h3 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4">Ready to Transform Your Career?</h3>
                         <p className="text-base sm:text-xl mb-6 sm:mb-8 opacity-90 max-w-2xl mx-auto">
                             Join thousands of professionals who've accelerated their careers with Interview Pro. Start your journey today with a free trial.

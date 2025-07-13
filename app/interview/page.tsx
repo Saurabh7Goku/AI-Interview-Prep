@@ -501,7 +501,7 @@ export default function InterviewPage() {
                                                 <User className="w-6 h-6 text-white" />
                                             </div>
                                             <div>
-                                                <span className="text-base font-semibold text-white">AI Interviewer</span>
+                                                <span className="text-base font-semibold text-white">PreplystHub - AI</span>
                                                 <p className="text-sm text-white/70">Question {currentIndex + 1} of {questions.length}</p>
                                             </div>
                                         </div>

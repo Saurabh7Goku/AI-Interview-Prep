@@ -97,6 +97,9 @@ export default function ResultsPage() {
             localStorage.removeItem("feedbacks");
             localStorage.removeItem("scores");
             localStorage.removeItem("currentQuestionIndex");
+            localStorage.removeItem("interviewRole");
+            localStorage.removeItem("interviewType")
+            localStorage.removeItem('skills')
             router.push("/homeform");
         } catch (error) {
             showToast("❌ Failed to clear results.", "error");
@@ -316,6 +319,8 @@ Feedback: ${results.feedbacks[i] || "No feedback available"}
                             localStorage.removeItem("feedbacks");
                             localStorage.removeItem("scores");
                             localStorage.removeItem("currentQuestionIndex");
+                            localStorage.removeItem("interviewRole");
+                            localStorage.removeItem("interviewType")
                             localStorage.removeItem('skills')
                             router.push("/history");
                         }}
