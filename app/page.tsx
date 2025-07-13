@@ -97,12 +97,15 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black">
       {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
+      <div className="
+          absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] sm:bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none">
+      </div>
+
 
       {/* Sidebar Overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/98 bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-black /98 bg-opacity-50 z-40 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
