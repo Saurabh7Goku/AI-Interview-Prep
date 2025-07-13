@@ -94,7 +94,7 @@ export default function Home() {
   const duplicatedTestimonials = [...testimonials, ...testimonials];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#ADBBD4] via-[#DDD3E8] to-[#8697C4]">
+    <div className="min-h-screen bg-black">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
 
@@ -167,7 +167,7 @@ export default function Home() {
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-10 px-4 sm:px-6 py-4 bg-transparent backdrop-blur-sm border-b border-blue-100 shadow-sm">
+      <nav className="relative z-10 px-4 sm:px-6 py-4 bg-transparent shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Image src={logo} alt="JobFlow AI Logo" className="md:w-16 md:h-16 w-12 h-12 rounded-xl flex items-center justify-center" />
@@ -219,11 +219,11 @@ export default function Home() {
             <Sparkles className="w-4 h-4 mr-2" />
             AI-Powered Interview Preparation
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-6 leading-tight">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-300 mb-6 leading-tight">
             Ace Your Next
             <span className="bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent"> Interview</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-500 mb-10 max-w-2xl mx-auto leading-relaxed">
             Generate personalized interview questions tailored to your job profile and experience level.
             Prepare smarter, not harder, with our AI-powered platform.
           </p>
@@ -242,7 +242,7 @@ export default function Home() {
               <span>Start Preparing Now</span>
               <ArrowRight className="w-5 h-5" />
             </button>
-            <button className="px-8 py-4 bg-white/80 backdrop-blur-sm text-gray-700 font-semibold rounded-2xl border-2 border-gray-200 hover:border-blue-300 transition-all duration-300 flex items-center space-x-2">
+            <button className="px-8 py-4 bg-gray-300 backdrop-blur-sm text-gray-700 font-semibold rounded-2xl border-2 border-gray-200 hover:border-blue-300 transition-all duration-300 flex items-center space-x-2">
               <MessageSquare className="w-5 h-5" />
               <span>Watch Demo</span>
             </button>
@@ -253,7 +253,7 @@ export default function Home() {
       {/* Stats Section */}
       <section className="relative z-10 px-6 py-16">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-white/60 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-100 p-8">
+          <div className="bg-gray-300 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-100 p-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {stats.map((stat, index) => (
                 <div key={index} className="text-center">
@@ -270,14 +270,14 @@ export default function Home() {
       <section className="relative z-10 px-6 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-800 mb-6">Why Choose PreplystHub - AI?</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold text-gray-300 mb-6">Why Choose PreplystHub - AI?</h2>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
               Our intelligent platform adapts to your needs, providing the most relevant and challenging questions.
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div key={index} className="bg-gray-300 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-300 hover:scale-105">
                 <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center text-white mb-4">
                   {feature.icon}
                 </div>
@@ -293,31 +293,31 @@ export default function Home() {
       <section className="relative z-10 px-6 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-800 mb-6">Success Stories</h2>
-            <p className="text-xl text-gray-600">See how others have succeeded with PreplystHub - AI</p>
+            <h2 className="text-4xl font-bold text-gray-300 mb-6">Success Stories</h2>
+            <p className="text-xl text-gray-400">See how others have succeeded with PreplystHub - AI</p>
           </div>
           <div className="relative overflow-hidden">
             <div className="flex gap-6 animate-scroll">
               {duplicatedTestimonials.map((testimonial, index) => (
                 <div
                   key={index}
-                  className="flex-shrink-0 w-80 bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-blue-100 hover:shadow-xl transition-shadow duration-300"
+                  className="flex-shrink-0 w-80 bg-gray-300 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-blue-100 hover:shadow-xl transition-shadow duration-300"
                 >
                   <div className="flex items-center mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                      <Star key={i} className="w-5 h-5 text-blue-700 fill-current" />
                     ))}
                   </div>
-                  <p className="text-gray-700 mb-4 italic leading-relaxed">{testimonial.text}</p>
+                  <p className="text-black mb-4 italic leading-relaxed">{testimonial.text}</p>
                   <div>
-                    <div className="font-semibold text-gray-800">{testimonial.name}</div>
-                    <div className="text-sm text-gray-600">{testimonial.role} at {testimonial.company}</div>
+                    <div className="font-semibold text-black">{testimonial.name}</div>
+                    <div className="text-sm text-black">{testimonial.role} at {testimonial.company}</div>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="absolute left-0 top-0 w-20 h-full bg-gradient-to-r from-blue-50 to-transparent pointer-events-none z-10"></div>
-            <div className="absolute right-0 top-0 w-20 h-full bg-gradient-to-l from-blue-50 to-transparent pointer-events-none z-10"></div>
+            <div className="absolute left-0 top-0 w-20 h-full bg-gradient-to-r from-black to-transparent pointer-events-none z-10"></div>
+            <div className="absolute right-0 top-0 w-20 h-full bg-gradient-to-l from-black to-transparent pointer-events-none z-10"></div>
           </div>
         </div>
         <style jsx>{`
@@ -355,16 +355,14 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 px-6 py-12 border-t border-blue-100">
+      <footer className="relative z-10 px-6 py-3 border-t border-blue-100">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-transparent rounded-xl flex items-center justify-center">
-                <Image src={logo} alt="JobFlow AI Logo" className="w-4 h-4 sm:w-6 sm:h-6" />
-              </div>
-              <span className="font-semibold text-gray-800">PreplystHub - AI</span>
+              <Image src={logo} alt="JobFlow AI Logo" className="w-12 h-12 md:w-18 md:h-18 rounded-xl flex items-center justify-center" />
+              <span className="font-semibold text-gray-300">PreplystHub - AI</span>
             </div>
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <div className="flex items-center space-x-2 text-sm text-gray-300">
               <Shield className="w-4 h-4" />
               <span>Powered by AI • Secure & Private</span>
             </div>

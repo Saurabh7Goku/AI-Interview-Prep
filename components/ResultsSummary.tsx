@@ -32,7 +32,7 @@ export default function ResultsSummary({
 
                 return (
                     <div key={index} className="border-b pb-6 border-gray-200 last:border-0">
-                        <h2 className="text-base md:text-xl font-semibold text-black mb-3">
+                        <h2 className="text-base md:text-xl font-semibold text-gray-300 mb-3">
                             Q{index + 1}: {question}
                         </h2>
 
@@ -41,7 +41,7 @@ export default function ResultsSummary({
                             <>
                                 <p className="text-red-600 font-medium mb-3">You skipped this question.</p>
                                 <div className="bg-transparent p-4 rounded-lg border border-gray-200">
-                                    <strong className="text-black block mb-2">Ideal Answer</strong>
+                                    <strong className="text-red block mb-2">Ideal Answer</strong>
                                     <div className="prose max-w-full break-words overflow-x-auto">
                                         <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
                                             {cleanedFeedback || "Ideal answer not available."}
@@ -53,19 +53,19 @@ export default function ResultsSummary({
                             <>
                                 {/* Score */}
                                 <div className="py-2">
-                                    <strong className="text-black">
+                                    <strong className="text-gray-300">
                                         Score: {score !== undefined ? `${score}/10` : "Not evaluated"}
                                     </strong>
                                 </div>
                                 {/* User's Answer */}
                                 <div className="mb-4">
-                                    <strong className="text-black">Your Answer:</strong>
-                                    <p className="mt-1 text-black">{userAnswer || "No answer recorded"}</p>
+                                    <strong className="text-gray-300">Your Answer:</strong>
+                                    <p className="mt-1 text-gray-300">{userAnswer || "No answer recorded"}</p>
                                 </div>
 
                                 {/* Feedback */}
                                 <div className="mb-3">
-                                    <strong className="text-black">Feedback:</strong>
+                                    <strong className="text-gray-300">Feedback:</strong>
                                     <div className="prose max-w-full break-words overflow-x-auto">
                                         <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
                                             {feedback || "No feedback available."}

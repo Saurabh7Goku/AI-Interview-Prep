@@ -31,7 +31,7 @@ export default function HistoryPage() {
     const [selectedInterview, setSelectedInterview] = useState<Interview | null>(null);
     const [isLoadingAuth, setIsLoadingAuth] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     useEffect(() => {
         const checkMobile = () => {
@@ -127,20 +127,16 @@ export default function HistoryPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#ADBBD4] via-[#DDD3E8] to-[#8697C4] flex relative">
-            {/* Background Grid Pattern */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
-
-            <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
+        <div className="flex h-screen">
+            <Sidebar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
             {/* Main Content */}
-            <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 flex flex-col overflow-y-auto bg-black">
                 {/* Header */}
-                <header className="bg-gray-800/80 backdrop-blur-xl shadow-lg border-b border-gray-700/50">
+                <header className="bg-black backdrop-blur-xl shadow-lg">
                     <div className="flex items-center justify-between px-4 py-4">
                         <div className="flex items-center space-x-4">
                             <button
-                                onClick={() => setSidebarOpen(true)}
+                                onClick={() => setIsSidebarOpen(true)}
                                 className="md:hidden text-gray-400 hover:text-white transition-colors"
                             >
                                 <Menu className="w-5 h-5" />
@@ -159,10 +155,10 @@ export default function HistoryPage() {
                 </header>
 
                 {/* Content */}
-                <main className="flex-1 overflow-auto p-6">
+                <main className="flex-1 overflow-auto p-4">
                     {history.length === 0 ? (
                         <div className="text-center py-12">
-                            <div className="w-32 h-32 bg-gray-800/50 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-gray-700/50">
+                            <div className="w-32 h-32 bg-gray-300 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-gray-700/50">
                                 <History className="w-16 h-16 text-gray-600" />
                             </div>
                             <p className="text-gray-300 text-xl font-semibold">No interviews yet</p>
@@ -175,7 +171,7 @@ export default function HistoryPage() {
                             </button>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                             {history.map((interview) => {
                                 const avgScore = getAvgScore(interview.scores);
                                 const scoreLabel = getScoreLabel(avgScore);
@@ -185,14 +181,14 @@ export default function HistoryPage() {
                                 return (
                                     <div
                                         key={interview.id}
-                                        className={`group relative bg-gray-800/50 backdrop-blur-xl rounded-2xl overflow-hidden border transition-all duration-300 cursor-pointer transform hover:-translate-y-2 hover:shadow-2xl ${isSelected
+                                        className={`group relative bg-white/2 backdrop-blur-xl rounded-2xl overflow-hidden border transition-all duration-300 cursor-pointer transform hover:-translate-y-2 hover:shadow-2xl ${isSelected
                                             ? 'ring-2 ring-blue-500/50 shadow-blue-500/20 shadow-2xl border-blue-500/30'
-                                            : 'border-gray-700/50 hover:border-gray-600/50 hover:bg-gray-800/70'
+                                            : 'hover:border-gray-600/50 hover:bg-gray-800/70'
                                             }`}
                                         onClick={() => setSelectedInterview(interview)}
                                     >
                                         {/* Header with gradient background */}
-                                        <div className="relative bg-gradient-to-br from-blue-600/20 to-purple-600/20 p-4 border-b border-gray-700/50">
+                                        <div className="relative bg-gradient-to-br from-blue-500 to-purple-100/20 p-4 border-b border-gray-700/50">
                                             <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full -translate-y-10 translate-x-10"></div>
                                             <div className="absolute bottom-0 left-0 w-12 h-12 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full translate-y-6 -translate-x-6"></div>
 
@@ -201,7 +197,7 @@ export default function HistoryPage() {
                                                     <div className="flex items-center space-x-3">
                                                         <div className="flex-1">
                                                             <h3 className="font-bold text-lg text-white leading-tight">{interview.interviewRole}</h3>
-                                                            <p className="text-blue-300 text-sm font-medium">{interview.interviewType} Interview</p>
+                                                            <p className="text-white text-sm font-medium">{interview.interviewType} Interview</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center space-x-2">
@@ -277,11 +273,11 @@ export default function HistoryPage() {
 
             {/* Detailed Analysis Modal/Panel */}
             {selectedInterview && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:hidden">
-                    <div className="bg-gray-800/95 backdrop-blur-xl rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-gray-700/50 shadow-2xl">
-                        <div className="p-6 border-b border-gray-700/50 bg-gray-900/50">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-xl font-bold text-white">Detailed Interview Analysis</h2>
+                <div className="fixed inset-0 bg-black backdrop-blur-sm z-50 flex items-center justify-center p-4 md:hidden">
+                    <div className="bg-white/2 backdrop-blur-xl rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+                        <div className="p-6 bg-red">
+                            <div className="flex items-center justify-between overflow-hidden">
+                                <h2 className="text-xl font-bold text-gray-300">Detailed Interview Analysis</h2>
                                 <button
                                     onClick={() => setSelectedInterview(null)}
                                     className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-700/50 rounded-lg"
@@ -306,10 +302,10 @@ export default function HistoryPage() {
 
             {/* Desktop Details Panel */}
             {selectedInterview && !isMobile && (
-                <div className="hidden md:block fixed right-0 top-0 h-full w-1/2 bg-gray-800/95 backdrop-blur-xl shadow-2xl z-40 overflow-y-auto border-l border-gray-700/50">
-                    <div className="p-6 border-b border-gray-700/50 bg-gray-900/50">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-xl font-bold text-white">Detailed Interview Analysis</h2>
+                <div className="hidden md:block fixed right-0 top-0 h-full w-1/2 bg-black shadow-2xl overflow-y-auto">
+                    <div className="flex flex-col">
+                        <div className="flex items-center justify-between p-6 border-b border-gray-700 bg-black sticky top-0 z-10">
+                            <h2 className="text-xl font-bold text-gray-300">Detailed Interview Analysis</h2>
                             <button
                                 onClick={() => setSelectedInterview(null)}
                                 className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-700/50 rounded-lg"
@@ -317,25 +313,26 @@ export default function HistoryPage() {
                                 <X className="w-6 h-6" />
                             </button>
                         </div>
+                        <div className="flex-1 overflow-y-auto p-6 text-white">
+                            <ResultsSummary
+                                questions={selectedInterview.questions}
+                                answers={selectedInterview.answers}
+                                feedbacks={selectedInterview.feedbacks}
+                                scores={selectedInterview.scores}
+                                interviewrole={selectedInterview.interviewRole}
+                                interviewtype={selectedInterview.interviewType}
+                            />
+                        </div>
                     </div>
-                    <div className="p-6 text-white">
-                        <ResultsSummary
-                            questions={selectedInterview.questions}
-                            answers={selectedInterview.answers}
-                            feedbacks={selectedInterview.feedbacks}
-                            scores={selectedInterview.scores}
-                            interviewrole={selectedInterview.interviewRole}
-                            interviewtype={selectedInterview.interviewType}
-                        />
-                    </div>
+
                 </div>
             )}
 
             {/* Mobile Sidebar Overlay */}
-            {sidebarOpen && (
+            {isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
-                    onClick={() => setSidebarOpen(false)}
+                    onClick={() => setIsSidebarOpen(false)}
                 />
             )}
         </div>

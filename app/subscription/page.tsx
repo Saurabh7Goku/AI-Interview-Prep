@@ -1,10 +1,11 @@
-"use client"
+'use client'
 import React, { useState } from 'react';
-import { Check, X, Star, Zap, Crown, Menu, ArrowRight, Users, Brain, FileText, Search, BarChart3, Bot, Shield, Award, Clock, User } from 'lucide-react';
-import Sidebar from '@/components/Sidebar';
+import { Check, X, Star, Zap, Crown, Menu, ArrowRight, Users, Brain, FileText, Search, BarChart3, Bot, Shield, Award, Clock, User, HandHeartIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function SubscriptionPage() {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const router = useRouter();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState('pro');
     const [isAnnual, setIsAnnual] = useState(false);
 
@@ -121,55 +122,55 @@ export default function SubscriptionPage() {
     ];
 
     return (
-        <div className="flex min-h-screen bg-gradient-to-br from-[#ADBBD4] via-[#DDD3E8] to-[#8697C4]">
-            {/* Background Grid Pattern */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
-
-            {/* Sidebar */}
-            <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
+        <div className="flex min-h-screen bg-black">
             {/* Mobile Sidebar Overlay */}
-            {sidebarOpen && (
+            {isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
-                    onClick={() => setSidebarOpen(false)}
+                    onClick={() => setIsSidebarOpen(false)}
                 />
             )}
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden min-w-0">
                 {/* Header */}
-                <header className="bg-gray-800/80 backdrop-blur-xl shadow-lg border-b border-gray-700/50">
+                <header className="bg-transparent backdrop-blur-xl shadow-sm">
                     <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
                         <div className="flex items-center space-x-3 sm:space-x-4">
                             <button
-                                onClick={() => setSidebarOpen(true)}
+                                onClick={() => setIsSidebarOpen(true)}
                                 className="lg:hidden text-gray-400 hover:text-white transition-colors"
                             >
                                 <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
                             </button>
                             <div>
-                                <h1 className="text-base sm:text-xl font-bold text-white">Subscription Plans</h1>
-                                <p className="hidden sm:block text-gray-400 text-xs sm:text-sm">Choose the plan that best fits your career goals</p>
+                                <h1 className="text-base sm:text-xl font-bold text-blue-700">Subscription Plans</h1>
+                                <p className="hidden sm:block text-gray-300 text-xs sm:text-sm">Choose the plan that best fits your career goals</p>
                             </div>
                         </div>
-                        <div className="flex items-center space-x-3 sm:space-x-4">
-                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                                <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                            </div>
-                        </div>
+                        <button
+                            onClick={() => router.push('/dashboard')}
+                            className="flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow transition-colors">
+                            Dashboard
+                        </button>
+
                     </div>
                 </header>
+                <div className="absolute top-0 right-1/100 w-66 h-66 rounded-full pointer-events-none bg-blue-700 opacity-30 blur-3xl"></div>
+
+                <div className="absolute top-1/2 left-1/100 w-66 h-66 rounded-full pointer-events-none bg-blue-700 opacity-30 blur-3xl"></div>
 
                 {/* Main Content */}
                 <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
                     {/* Hero Section */}
                     <div className="text-center mb-12 sm:mb-16">
+
                         <div className="inline-flex items-center bg-blue-50 text-blue-700 px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium mb-4 sm:mb-6">
                             <Award size={14} className="mr-2 sm:mr-2" />
                             Trusted by 10,000+ professionals
                         </div>
-                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
+
+                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-300 mb-4 sm:mb-6 leading-tight">
                             Choose Your
                             <span className="bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent"> Success Plan</span>
                         </h2>
@@ -179,7 +180,7 @@ export default function SubscriptionPage() {
 
                         {/* Billing Toggle */}
                         <div className="flex items-center justify-center mb-8 sm:mb-12">
-                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-2 shadow-lg">
+                            <div className="bg-white backdrop-blur-sm rounded-2xl p-2 shadow-lg">
                                 <div className="flex items-center">
                                     <span className={`px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm ${!isAnnual ? 'font-semibold text-blue-700' : 'text-gray-600'}`}>
                                         Monthly
@@ -208,11 +209,11 @@ export default function SubscriptionPage() {
                         {plans.map((plan, index) => (
                             <div
                                 key={plan.name}
-                                className={`relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 hover:shadow-3xl hover:scale-105 border-2 ${plan.popular ? 'border-blue-500 ring-4 ring-blue-500/10' : plan.borderColor}`}
+                                className={`relative bg-white/3 rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 hover:shadow-3xl hover:scale-105 border-2 ${plan.popular ? 'border-blue-500 ring-4 ring-blue-500/10' : plan.borderColor}`}
                             >
                                 {plan.popular && (
-                                    <div className="absolute top-0 left-0 right-0 text-blue-700 text-center py-2 sm:py-3 text-xs sm:text-sm font-semibold">
-                                        <Star className="inline mr-1 sm:mr-2" size={14} />
+                                    <div className="absolute top-0 left-0 right-0 text-blue-700 text-center py-2 sm:py-3 text-sm md:text-lg font-semibold">
+                                        <Star className="inline mr-1 sm:mr-2" size={22} />
                                         Most Popular Choice
                                     </div>
                                 )}
@@ -229,20 +230,20 @@ export default function SubscriptionPage() {
                                         )}
                                     </div>
 
-                                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">{plan.name}</h3>
-                                    <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 leading-relaxed">{plan.description}</p>
+                                    <h3 className="text-xl sm:text-2xl font-bold text-gray-300 mb-2 sm:mb-3">{plan.name}</h3>
+                                    <p className="text-sm sm:text-base text-gray-400 mb-6 sm:mb-8 leading-relaxed">{plan.description}</p>
 
                                     <div className="mb-6 sm:mb-8">
                                         <div className="flex items-baseline">
-                                            <span className="text-4xl sm:text-5xl font-bold text-gray-900">
+                                            <span className="text-4xl sm:text-5xl font-bold text-gray-300">
                                                 ${isAnnual ? plan.price.annual : plan.price.monthly}
                                             </span>
-                                            <span className="text-sm sm:text-base text-gray-600 ml-2">
+                                            <span className="text-sm sm:text-base text-gray-400 ml-2">
                                                 {plan.price.monthly > 0 ? (isAnnual ? '/year' : '/month') : ''}
                                             </span>
                                         </div>
                                         {isAnnual && plan.price.monthly > 0 && (
-                                            <div className="text-xs sm:text-sm text-gray-500 mt-2">
+                                            <div className="text-xs sm:text-sm text-gray-400 mt-2">
                                                 ${Math.round(plan.price.annual / 12)}/month when billed annually
                                             </div>
                                         )}
@@ -252,33 +253,33 @@ export default function SubscriptionPage() {
                                         className={`w-full py-3 sm:py-4 px-4 sm:px-6 rounded-xl font-semibold text-base sm:text-lg transition-all duration-300 ${plan.buttonColor} hover:shadow-lg hover:scale-105 flex items-center justify-center`}
                                         onClick={() => setSelectedPlan(plan.name.toLowerCase())}
                                     >
-                                        {plan.name === 'Free' ? 'Start Free Trial' : `Choose ${plan.name}`}
+                                        {plan.name === 'Free' ? 'Start Free Trial' : `${plan.name} Plan`}
                                         <ArrowRight className="ml-2" size={18} />
                                     </button>
                                 </div>
 
                                 <div className="px-6 sm:px-8 pb-6 sm:pb-8">
                                     <div className="border-t border-gray-200 pt-4 sm:pt-6">
-                                        <h4 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">What's included:</h4>
+                                        <h4 className="font-semibold text-gray-200 mb-3 sm:mb-4 text-sm sm:text-base">What's included:</h4>
                                         <ul className="space-y-3 sm:space-y-4">
                                             {plan.features.map((feature, idx) => (
                                                 <li key={idx} className="flex items-start">
                                                     <div className="flex-shrink-0 mt-1">
                                                         {feature.included ? (
                                                             <div className="p-1 bg-green-100 rounded-full">
-                                                                <Check className="text-green-600" size={12} />
+                                                                <Check className="text-green-600" size={18} />
                                                             </div>
                                                         ) : (
                                                             <div className="p-1 bg-gray-100 rounded-full">
-                                                                <X className="text-gray-400" size={12} />
+                                                                <X className="text-red-600" size={18} />
                                                             </div>
                                                         )}
                                                     </div>
                                                     <div className="ml-3 sm:ml-4">
-                                                        <span className={`font-medium text-sm sm:text-base ${feature.included ? 'text-gray-900' : 'text-gray-500'}`}>
+                                                        <span className={`font-medium text-sm sm:text-base ${feature.included ? 'text-blue-600' : 'text-red-400'}`}>
                                                             {feature.name}
                                                         </span>
-                                                        <div className="text-xs sm:text-sm text-gray-500 mt-1">{feature.value}</div>
+                                                        <div className="text-xs sm:text-sm text-gray-300 mt-1">{feature.value}</div>
                                                     </div>
                                                 </li>
                                             ))}
@@ -290,10 +291,10 @@ export default function SubscriptionPage() {
                     </div>
 
                     {/* Features Section */}
-                    <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 sm:p-12 mb-12 sm:mb-16 shadow-xl">
+                    <div className="bg-white/2 backdrop-blur-sm rounded-3xl p-8 sm:p-12 mb-12 sm:mb-16 shadow-xl">
                         <div className="text-center mb-8 sm:mb-12">
-                            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Why Choose Interview Pro?</h3>
-                            <p className="text-sm sm:text-lg text-gray-600 max-w-2xl mx-auto">
+                            <h3 className="text-2xl sm:text-3xl font-bold text-gray-300 mb-3 sm:mb-4">Why Choose Interview Pro?</h3>
+                            <p className="text-sm sm:text-lg text-gray-300 max-w-2xl mx-auto">
                                 Our platform combines cutting-edge AI technology with proven interview strategies to give you the competitive edge
                             </p>
                         </div>
@@ -303,47 +304,50 @@ export default function SubscriptionPage() {
                                     <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-4 sm:p-6 rounded-2xl inline-block mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
                                         <feature.icon size={32} className="sm:w-9 sm:h-9" />
                                     </div>
-                                    <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-3">{feature.title}</h4>
-                                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{feature.description}</p>
+                                    <h4 className="text-lg sm:text-xl font-semibold text-gray-400 mb-2 sm:mb-3">{feature.title}</h4>
+                                    <p className="text-sm sm:text-base text-gray-500 leading-relaxed">{feature.description}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
 
                     {/* Social Proof */}
-                    <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 sm:p-12 mb-12 sm:mb-16 shadow-xl">
+                    <div className="bg-white/2 backdrop-blur-sm rounded-3xl p-8 sm:p-12 mb-12 sm:mb-16 shadow-xl">
                         <div className="text-center mb-8 sm:mb-12">
-                            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
+                            <h3 className="text-2xl sm:text-3xl font-bold text-gray-300 mb-3 sm:mb-4">
                                 Trusted by Professionals Worldwide
                             </h3>
-                            <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6 sm:mb-8">
-                                <div className="text-center">
-                                    <div className="text-2xl sm:text-3xl font-bold text-blue-600">95%</div>
-                                    <div className="text-xs sm:text-sm text-gray-600">Success Rate</div>
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-2xl sm:text-3xl font-bold text-blue-600">10K+</div>
-                                    <div className="text-xs sm:text-sm text-gray-600">Happy Users</div>
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-2xl sm:text-3xl font-bold text-blue-600">500+</div>
-                                    <div className="text-xs sm:text-sm text-gray-600">Companies</div>
+                            <div className="flex justify-center mb-8 sm:mb-12">
+                                <div className="inline-flex flex-col sm:flex-row bg-white/4 rounded-lg px-4 py-2 space-y-4 sm:space-y-0 sm:space-x-6">
+                                    <div className="text-center">
+                                        <div className="text-2xl sm:text-3xl font-bold text-blue-600">95%</div>
+                                        <div className="text-xs sm:text-sm text-gray-300">Success Rate</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-2xl sm:text-3xl font-bold text-blue-600">10K+</div>
+                                        <div className="text-xs sm:text-sm text-gray-300">Happy Users</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-2xl sm:text-3xl font-bold text-blue-600">500+</div>
+                                        <div className="text-xs sm:text-sm text-gray-300">Companies</div>
+                                    </div>
                                 </div>
                             </div>
+
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                             {testimonials.map((testimonial, index) => (
-                                <div key={index} className="bg-gray-50 rounded-2xl p-4 sm:p-6">
+                                <div key={index} className="bg-white/2 rounded-2xl p-4 sm:p-6">
                                     <div className="flex items-center mb-3 sm:mb-4">
                                         {[...Array(testimonial.rating)].map((_, i) => (
                                             <Star key={i} className="text-yellow-500 fill-current" size={14} />
                                         ))}
                                     </div>
-                                    <p className="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4 italic">"{testimonial.content}"</p>
+                                    <p className="text-sm sm:text-base text-gray-300 mb-3 sm:mb-4 italic">"{testimonial.content}"</p>
                                     <div>
-                                        <div className="font-semibold text-sm sm:text-base text-gray-900">{testimonial.name}</div>
-                                        <div className="text-xs sm:text-sm text-gray-600">{testimonial.role} at {testimonial.company}</div>
+                                        <div className="font-semibold text-sm sm:text-base text-gray-300">{testimonial.name}</div>
+                                        <div className="text-xs sm:text-sm text-blue-600">{testimonial.role} at {testimonial.company}</div>
                                     </div>
                                 </div>
                             ))}
@@ -351,13 +355,15 @@ export default function SubscriptionPage() {
                     </div>
 
                     {/* Final CTA */}
-                    <div className="text-center bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-3xl p-8 sm:p-12 shadow-2xl">
+                    <div className="text-center bg-white/2 text-white rounded-3xl p-8 sm:p-12 shadow-2xl">
                         <h3 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4">Ready to Transform Your Career?</h3>
                         <p className="text-base sm:text-xl mb-6 sm:mb-8 opacity-90 max-w-2xl mx-auto">
                             Join thousands of professionals who've accelerated their careers with Interview Pro. Start your journey today with a free trial.
                         </p>
                         <div className="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-3 sm:space-x-4">
-                            <button className="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg hover:bg-gray-100 transition-all hover:shadow-lg flex items-center">
+                            <button
+                                onClick={() => router.push("/dashboard")}
+                                className="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg hover:bg-gray-100 transition-all hover:shadow-lg flex items-center">
                                 <Clock className="mr-2" size={18} />
                                 Start Free Trial
                             </button>

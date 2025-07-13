@@ -1,68 +1,95 @@
-"use client";
-import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
-import { Home, FileText, Search, MessageCircle, History, X } from "lucide-react";
+import React from 'react';
+import { Search, FileText, Home, History, LogIn, Users, X, TargetIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import logo from '@/public/logo.png';
 
 interface SidebarProps {
-    isOpen: boolean;
-    onClose: () => void;
+    isSidebarOpen: boolean;
+    setIsSidebarOpen: (isOpen: boolean) => void;
 }
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) => {
     const router = useRouter();
-    const pathname = usePathname();
 
-    const sidebarItems = [
-        { name: "Dashboard", icon: Home, path: "/dashboard" },
-        { name: "ATS Scan", icon: FileText, path: "/ats-scan" },
-        { name: "Job Finder", icon: Search, path: "/job-finder" },
-        { name: "Mock Interview", icon: MessageCircle, path: "/mock-interview" },
-        { name: "History", icon: History, path: "/history" },
-    ];
+    const sidebarItems: {
+        name: string;
+        icon: React.FC<any>;
+        path?: string;
+        action?: string;
+    }[] = [
+            { name: 'Dashboard', icon: Home, path: '/dashboard' },
+            { name: 'ATS Scan', icon: FileText, path: '/subscription' },
+            { name: 'Job Finder', icon: Search, path: '/subscription' },
+            { name: 'Mock Interview', icon: Users, path: '/mock-interview' },
+            { name: 'History', icon: History, path: '/history' },
+            { name: 'Premium', icon: TargetIcon, path: '/subscription' },
+            { name: 'Log Out', icon: LogIn, action: 'logout' },
+        ];
+
 
     return (
-        <div
-            className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 transform ${isOpen ? "translate-x-0" : "-translate-x-full"
-                } transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0`}
-        >
-            <div className="flex items-center justify-between h-16 px-6 bg-gray-800">
-                <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">Prep</span>
+        <div className={`fixed top-0 left-0 h-full bg-black/98 w-64 shadow-xl transform transition-transform duration-300 ease-in-out z-50 lg:static lg:shadow-none lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <div className="flex flex-col h-full">
+                {/* Sidebar Header */}
+                <div className="px-5 py-5 border-b border-gray-700">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                            <Image src={logo} alt="PreplystHub - AI Logo" className="w-12 h-12 rounded-xl flex items-center justify-center" />
+                            <span className="text-lg font-bold text-white">PreplystHub - AI</span>
+                        </div>
+                        <button
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="p-2 rounded-lg hover:bg-gray-700 transition-colors lg:hidden"
+                        >
+                            <X className="w-5 h-5 text-gray-400" />
+                        </button>
                     </div>
-                    <span className="text-white font-bold text-lg">aiInterPrep</span>
                 </div>
-                <button
-                    onClick={onClose}
-                    className="md:hidden text-gray-400 hover:text-white"
-                >
-                    <X className="w-6 h-6" />
-                </button>
-            </div>
 
-            <nav className="mt-8">
-                <div className="px-4 mb-4">
-                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                        Main Menu
-                    </h3>
+                {/* Navigation */}
+                <nav className="flex-1 px-4 py-6 space-y-2">
+                    {sidebarItems.map((item) => (
+                        <button
+                            key={item.name}
+                            onClick={() => {
+                                setIsSidebarOpen(false);
+                                if (item.action === 'logout') {
+                                    localStorage.clear();
+                                    router.push('/');
+                                } else if (item.path) {
+                                    router.push(item.path);
+                                }
+                            }}
+                            className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-200 ${item.name === 'Dashboard'
+                                ? 'bg-blue-600 text-white shadow-sm'
+                                : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                                }`}
+                        >
+                            <item.icon className="w-5 h-5 mr-3" />
+                            <span className="font-medium">{item.name}</span>
+                        </button>
+                    ))}
+
+                </nav>
+
+                {/* Sidebar Footer */}
+                <div className="p-4 border-t border-gray-700">
+                    <div className="bg-black/40 p-4 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                                <span className="text-white text-sm font-medium">U</span>
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-white">User</p>
+                                <p className="text-xs text-gray-400">Free Plan</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                {sidebarItems.map((item) => (
-                    <button
-                        key={item.name}
-                        onClick={() => {
-                            router.push(item.path);
-                            onClose(); // Close sidebar on mobile after navigation
-                        }}
-                        className={`w-full flex items-center px-6 py-3 text-left transition-colors ${pathname === item.path
-                            ? "bg-gray-800 text-white border-r-2 border-blue-600"
-                            : "text-gray-400 hover:text-white hover:bg-gray-800"
-                            }`}
-                    >
-                        <item.icon className="w-5 h-5 mr-3" />
-                        {item.name}
-                    </button>
-                ))}
-            </nav>
+            </div>
         </div>
     );
-}
+};
+
+export default Sidebar;

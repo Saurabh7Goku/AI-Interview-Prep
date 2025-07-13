@@ -42,7 +42,7 @@ export async function saveInterview(userId: string, interviewData: {
     createdAt: string | Timestamp;
   }) {
     try {
-      const docRef = await addDoc(collection(db, "interviews"), {
+      const docRef = await addDoc(collection(db, "users", userId, "interviews"), {
         userId,
         ...interviewData,
         createdAt: Timestamp.fromDate(new Date()), // Use Firestore Timestamp
