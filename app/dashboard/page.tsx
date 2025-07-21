@@ -223,7 +223,7 @@ const Dashboard = () => {
     ];
 
     const services = [
-        { title: 'ATS Scan', value: 'Scan your resume', change: 'Optimize now', icon: FileText, color: 'bg-blue-600', path: 'https://ats-resume-a7rk.onrender.com' },
+        { title: 'ATS Scan', value: 'Scan your resume', change: 'Optimize now', icon: FileText, color: 'bg-blue-600', action: 'atsscan' },
         { title: 'Resume Builder', value: 'Build resume', change: 'Create now', icon: FileText, color: 'bg-blue-700', action: 'premium' },
         { title: 'Job Search', value: 'Find jobs', change: 'Search now', icon: Briefcase, color: 'bg-blue-600', action: 'premium' },
         { title: 'Interview Prep', value: 'Practice now', change: 'Start prep', icon: Users, color: 'bg-blue-700', action: 'homeform' },
@@ -241,7 +241,10 @@ const Dashboard = () => {
             localStorage.removeItem('skills')
             showToast("Fill Out the Form", "success");
             router.push('/homeform');
-        } else {
+        }
+        else if(action === 'atsscan'){
+            window.open('https://ats-resume-a7rk.onrender.com', '_blank');
+        }else {
             setShowPremiumPopup(true);
         }
     };
