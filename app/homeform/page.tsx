@@ -1,9 +1,12 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Briefcase, User, ChevronDown, Sparkles, ArrowRight, Brain, Zap, Shield, Code, Database, Palette, MessageCircle, TrendingUp, Globe, Smartphone, Server, Camera, Star, Target, ListChecks, Languages, Tag, CheckCircle, Users, Award } from "lucide-react";
+import { Briefcase, User, Sparkles, ArrowRight, Brain, Zap, Shield, Code, Database, Palette, MessageCircle, TrendingUp, Globe, Smartphone, Server, Camera, Star, Target, ListChecks, Languages, Tag, CheckCircle, Users, Award } from "lucide-react";
 import Image from "next/image";
 import logo from "@/public/logo.png"
+import { getAuth } from "firebase/auth";
+import { collection, getDocs, getFirestore } from "firebase/firestore";
+import toast from "react-hot-toast";
 
 export default function HomeForm() {
     const router = useRouter();
@@ -16,10 +19,45 @@ export default function HomeForm() {
     const [focusTopics, setFocusTopics] = useState("");
     const [loading, setLoading] = useState(false);
 
+    const unlimitedEmails = ["saurabhgk7@gmail.com"];
+
     const handleSubmit = async (e: { preventDefault: () => void; }) => {
         e.preventDefault();
         setLoading(true);
         try {
+            const auth = getAuth();
+            const db = getFirestore();
+            const user = auth.currentUser;
+
+            if (!user || !user.email) {
+                alert("Please sign in to continue.");
+                setLoading(false);
+                return;
+            }
+
+            const userId = user.uid;
+            const email = user.email;
+            const isUnlimited = unlimitedEmails.includes(email);
+
+            // Check current interview count
+            if (!isUnlimited) {
+                const interviewsRef = collection(db, "users", userId, "interviews");
+                const snapshot = await getDocs(interviewsRef);
+                const count = snapshot.size;
+
+                if (count >= 3) {
+                    toast.error("Limit reached: Upgrade tier to access unlimited interviews");
+                    setLoading(false);
+                    router.push("/dashboard");
+                    return;
+                }
+
+                toast(`You've used ${count} out of 3 free interviews`, {
+                    icon: "💡",
+                    duration: 3000,
+                });
+            }
+
             const res = await fetch("/api/generateQuestions", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -34,7 +72,7 @@ export default function HomeForm() {
                 }),
             });
             const data = await res.json();
-            
+
             localStorage.setItem("questions", JSON.stringify(data.questions));
             localStorage.setItem("currentQuestionIndex", "0");
             localStorage.setItem("interviewType", interviewType);

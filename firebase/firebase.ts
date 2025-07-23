@@ -45,8 +45,8 @@ export async function saveInterview(userId: string, interviewData: {
       const docRef = await addDoc(collection(db, "users", userId, "interviews"), {
         userId,
         ...interviewData,
-        createdAt: Timestamp.fromDate(new Date()), // Use Firestore Timestamp
-        timestamp: interviewData.timestamp || new Date().toISOString(), // Keep for backward compatibility
+        createdAt: Timestamp.fromDate(new Date()),
+        timestamp: interviewData.timestamp || new Date().toISOString(), 
       });
       console.log("Interview saved with ID:", docRef.id);
       return docRef.id;
