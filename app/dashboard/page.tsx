@@ -96,7 +96,7 @@ const Dashboard = () => {
     const [interviewData, setInterviewData] = useState<Interview[]>([]);
     const [showPremiumPopup, setShowPremiumPopup] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [selectedRange, setSelectedRange] = useState<TimeRange>('Last 7 Days');
+    const [selectedRange, setSelectedRange] = useState<TimeRange>('This Year');
     const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
     const [isDataLoading, setIsDataLoading] = useState<boolean>(false);
     const [selectedChart, setSelectedChart] = useState<'area' | 'bar' | 'line' | 'composed'>('area');
@@ -377,9 +377,9 @@ const Dashboard = () => {
             showToast('Fill Out the Form', 'success');
             router.push('/homeform');
         }
-        else if(action === 'atsscan'){
+        else if (action === 'atsscan') {
             window.open('https://ats-resume-a7rk.onrender.com', '_blank');
-        }else {
+        } else {
             setShowPremiumPopup(true);
         }
     };
