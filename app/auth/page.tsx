@@ -53,6 +53,7 @@ export default function AuthPage() {
         }
     };
 
+
     const handleEmailAuth = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
@@ -101,6 +102,22 @@ export default function AuthPage() {
             setLoading(false);
         }
     };
+
+    const resendVerificationEmail = async () => {
+        const user = auth.currentUser;
+        if (user && !user.emailVerified) {
+            try {
+                await sendEmailVerification(user);
+                showToast("✅ New verification email sent.", "success");
+            } catch (error: any) {
+                console.error("Error sending email verification:", error);
+                showToast(`❌ Failed to resend verification email: ${error.message}`, "error");
+            }
+        } else {
+            showToast("⚠️ Email is already verified.", "warning");
+        }
+    };
+
 
     return (
         <div className="min-h-screen bg-black flex items-center justify-center p-4">
@@ -300,9 +317,16 @@ export default function AuthPage() {
 
                             {/* Additional info */}
                             <div className="mt-6 text-center">
-                                <p className="text-xs font-bold text-red-500">
+                                <p className="text-xs font-bold text-red-500 mb-2">
                                     Didn't receive the email? Check your spam folder
                                 </p>
+                                <button
+                                    onClick={resendVerificationEmail}
+                                    className="text-xs text-blue-600 hover:underline"
+                                >
+                                    Resend Verification Email
+                                </button>
+
                             </div>
                         </div>
                     </div>

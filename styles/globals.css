@@ -17,6 +17,16 @@
 }
 
 
+/* Add this to your container/body to prevent overflow */
+.container {
+  overflow: hidden; /* This prevents scrollbars */
+}
+
+/* Or apply to body if needed */
+body {
+  overflow-x: hidden; /* Only hide horizontal scrollbar */
+}
+
 @keyframes orbitWrap {
   0% {
     transform: translateX(-60vw) scale(1.2) rotate(0deg);
@@ -30,11 +40,11 @@
     opacity: 0.4;
   }
   70% {
-    transform: translateX(60vw) scale(1.2) rotate(288deg);
+    transform: translateX(50vw) scale(1.2) rotate(288deg); /* Reduced from 60vw */
     opacity: 0.3;
   }
   80% {
-    transform: translateX(70vw) scale(1.2) rotate(324deg); /* keep going right */
+    transform: translateX(55vw) scale(1.2) rotate(324deg); /* Reduced from 70vw */
     opacity: 0;
   }
   100% {
@@ -43,10 +53,9 @@
   }
 }
 
-
 .space-orb {
   position: absolute;
-  top: 40%;             /* adjust as needed */
+  top: 40%;
   left: 50%;
   width: 16rem;         
   height: 16rem;
@@ -54,4 +63,6 @@
   border-radius: 9999px;
   filter: blur(100px);
   animation: orbitWrap 10s linear infinite;
+  /* Ensure the orb doesn't create overflow */
+  transform-origin: center;
 }
