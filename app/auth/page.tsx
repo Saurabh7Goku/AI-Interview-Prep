@@ -7,7 +7,7 @@ import { useToast } from "@/components/ToastProvide";
 import { Briefcase, Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
 import Image from "next/image";
 import logo from "@/public/logo.png"
-
+import { updateProfile } from "firebase/auth";
 
 export default function AuthPage() {
     const router = useRouter();
@@ -18,16 +18,25 @@ export default function AuthPage() {
     const [name, setName] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [showVerifyModal, setShowVerifyModal] = useState(false);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
-                showToast("✅ Successfully signed in!", "success");
-                router.push("/dashboard");
+                if (user.emailVerified) {
+                    showToast("✅ Successfully signed in!", "success");
+                    router.push("/dashboard");
+                } else {
+                    // Do NOT redirect, optionally sign them out
+                    showToast("⚠️ Please verify your email before signing in.", "warning");
+                    auth.signOut();
+                }
             }
         });
+
         return () => unsubscribe();
     }, [router, showToast]);
+
 
     const handleGoogleSignIn = async () => {
         try {
@@ -54,9 +63,14 @@ export default function AuthPage() {
                     throw new Error("Password must be at least 8 characters long.");
                 }
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
                 if (userCredential.user) {
+                    await updateProfile(userCredential.user, {
+                        displayName: name,
+                    });
                     await sendEmailVerification(userCredential.user);
                     showToast("✅Please verify your email before signing in.", "success");
+                    setShowVerifyModal(true);
                 }
             } else {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -67,7 +81,7 @@ export default function AuthPage() {
                     return;
                 }
                 showToast("✅ Signed in successfully!", "success");
-                router.push("/history");
+                router.push("/dashboard");
             }
         } catch (error: any) {
             if (error.code === "auth/user-not-found") {
@@ -211,7 +225,89 @@ export default function AuthPage() {
                     </button>
                 </p>
             </div>
+            {showVerifyModal && (
+                <div className="fixed inset-0 bg-gradient-to-br from-black/60 via-black/70 to-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white text-gray-900 rounded-3xl p-8 w-full max-w-md shadow-2xl relative transform transition-all duration-300 animate-in fade-in-0 zoom-in-95 border border-gray-100">
+                        {/* Decorative gradient background */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl opacity-40"></div>
 
+                        {/* Content */}
+                        <div className="relative z-10">
+                            {/* Icon */}
+                            <div className="flex justify-center mb-6">
+                                <div className="relative">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center">
+                                        <span className="text-xs font-bold text-amber-900">!</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Title */}
+                            <h3 className="text-2xl font-bold mb-3 text-center bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                                Verify Your Email
+                            </h3>
+
+                            {/* Description */}
+                            <div className="text-center mb-8">
+                                <p className="text-gray-600 leading-relaxed">
+                                    A verification email has been sent to
+                                </p>
+                                <div className="mt-2 px-4 py-2 bg-gray-50 rounded-xl border border-gray-200 inline-block">
+                                    <span className="font-semibold text-gray-900">{email}</span>
+                                </div>
+                                <p className="text-gray-600 mt-2 text-sm">
+                                    Please verify your email before continuing.
+                                </p>
+                            </div>
+
+                            {/* Buttons */}
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => {
+                                        auth.signOut();
+                                        setShowVerifyModal(false);
+                                    }}
+                                    className="flex-1 text-gray-600 bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    onClick={async () => {
+                                        const user = auth.currentUser;
+                                        await user?.reload();
+                                        if (user?.emailVerified) {
+                                            showToast("✅ Email verified!", "success");
+                                            setShowVerifyModal(false);
+                                            router.push("/dashboard");
+                                        } else {
+                                            showToast("❌ Email not verified yet.", "error");
+                                        }
+                                    }}
+                                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Done
+                                </button>
+                            </div>
+
+                            {/* Additional info */}
+                            <div className="mt-6 text-center">
+                                <p className="text-xs font-bold text-red-500">
+                                    Didn't receive the email? Check your spam folder
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             <style jsx>{`
     .animate-fade-in { animation: fadeIn 0.3s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

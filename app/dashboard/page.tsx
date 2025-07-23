@@ -358,7 +358,7 @@ const Dashboard = () => {
         : [];
 
     const services = [
-        { title: 'ATS Scan', value: 'Scan your resume', change: 'Optimize now', icon: FileText, color: 'bg-blue-600', action: 'premium' },
+        { title: 'ATS Scan', value: 'Scan your resume', change: 'Optimize now', icon: FileText, color: 'bg-blue-600', action: 'atsscan' },
         { title: 'Resume Builder', value: 'Build resume', change: 'Create now', icon: FileText, color: 'bg-blue-700', action: 'premium' },
         { title: 'Job Search', value: 'Find jobs', change: 'Search now', icon: Briefcase, color: 'bg-blue-600', action: 'premium' },
         { title: 'Interview Prep', value: 'Practice now', change: 'Start prep', icon: Users, color: 'bg-blue-700', action: 'homeform' },
@@ -378,7 +378,7 @@ const Dashboard = () => {
             router.push('/homeform');
         }
         else if (action === 'atsscan') {
-            window.open('https://ats-resume-a7rk.onrender.com', '_blank');
+            router.push('/atsDashboard')
         } else {
             setShowPremiumPopup(true);
         }
@@ -423,6 +423,7 @@ const Dashboard = () => {
                         <XAxis dataKey="label" stroke="#9CA3AF" fontSize={12} />
                         <YAxis stroke="#9CA3AF" fontSize={12} domain={[0, 10]} />
                         <Tooltip content={<CustomTooltip />} />
+                        <Legend />
                         <ReferenceLine y={7} stroke="#F59E0B" strokeDasharray="5 5" label="Target" />
                         <Area
                             type="monotone"
@@ -451,6 +452,7 @@ const Dashboard = () => {
                         <XAxis dataKey="label" stroke="#9CA3AF" fontSize={12} />
                         <YAxis stroke="#9CA3AF" fontSize={12} domain={[0, 10]} />
                         <Tooltip content={<CustomTooltip />} />
+                        <Legend />
                         <Bar dataKey="average" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
                         {selectedMetric === 'all' && (
                             <Bar dataKey="maximum" fill="#10B981" radius={[4, 4, 0, 0]} />
@@ -464,6 +466,7 @@ const Dashboard = () => {
                         <XAxis dataKey="label" stroke="#9CA3AF" fontSize={12} />
                         <YAxis stroke="#9CA3AF" fontSize={12} domain={[0, 10]} />
                         <Tooltip content={<CustomTooltip />} />
+                        <Legend />
                         <Bar dataKey="count" fill="#06B6D4" radius={[4, 4, 0, 0]} yAxisId="right" />
                         <Line type="monotone" dataKey="average" stroke="#8B5CF6" strokeWidth={3} />
                         <YAxis yAxisId="right" orientation="right" stroke="#06B6D4" fontSize={12} />
@@ -476,6 +479,7 @@ const Dashboard = () => {
                         <XAxis dataKey="label" stroke="#9CA3AF" fontSize={12} />
                         <YAxis stroke="#9CA3AF" fontSize={12} domain={[0, 10]} />
                         <Tooltip content={<CustomTooltip />} />
+                        <Legend />
                         <ReferenceLine y={7} stroke="#F59E0B" strokeDasharray="5 5" label="Target" />
                         <Line
                             type="monotone"
@@ -919,10 +923,10 @@ const Dashboard = () => {
                                 </button>
                             </div>
                             <p className="text-gray-300 mb-4">
-                                Upgrade to SuperGrok to access advanced features like ATS Scan, Resume Builder, and Job Search.
+                                Upgrade to Pro or Enterprise Plan to access advanced features like ATS Scan, Resume Builder, and Job Search.
                             </p>
                             <a
-                                href="https://x.ai/grok"
+                                href="/subscription"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-block px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300"

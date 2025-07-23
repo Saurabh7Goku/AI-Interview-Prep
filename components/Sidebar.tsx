@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, FileText, Home, History, LogIn, Users, X, TargetIcon } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import logo from '@/public/logo.png';
 import { createPortal } from 'react-dom';
+import { auth } from "@/firebase/firebase";
 
 interface SidebarProps {
     isSidebarOpen: boolean;
@@ -14,6 +15,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
     const router = useRouter();
     const pathname = usePathname();
     const [showPremiumPopup, setShowPremiumPopup] = useState(false);
+    const [userName, setUserName] = useState("");
 
     const sidebarItems: {
         name: string;
@@ -22,13 +24,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
         action?: string;
     }[] = [
             { name: 'Dashboard', icon: Home, path: '/dashboard' },
-            { name: 'ATS Scan', icon: FileText, path: 'https://ats-resume-a7rk.onrender.com' },
+            { name: 'ATS Scan', icon: FileText, path: '/atsDashboard' },
             { name: 'Job Finder', icon: Search, action: 'subscription' },
             { name: 'Mock Interview', icon: Users, path: '/homeform' },
             { name: 'History', icon: History, path: '/history' },
             { name: 'Premium', icon: TargetIcon, action: 'subscription' },
             { name: 'Log Out', icon: LogIn, action: 'logout' },
         ];
+
+    useEffect(() => {
+        const user = auth?.currentUser;
+        if (user) {
+            setUserName(user.displayName || user.email || "User");
+        } else {
+            setUserName("User");
+        }
+    }, []);
+
+
 
     return (
         <div className={`fixed top-0 left-0 h-full bg-black/98 w-80 sm:w-64 shadow-xl transform transition-transform duration-300 ease-in-out z-50 lg:static lg:shadow-none lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
@@ -91,7 +104,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
                                 <span className="text-white text-sm font-medium">U</span>
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-white">User</p>
+                                <p className="text-sm font-medium text-white">{userName}</p>
                                 <p className="text-xs text-gray-400">Free Plan</p>
                             </div>
                         </div>
