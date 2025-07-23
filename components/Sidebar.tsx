@@ -3,6 +3,7 @@ import { Search, FileText, Home, History, LogIn, Users, X, TargetIcon } from 'lu
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import logo from '@/public/logo.png';
+import { createPortal } from 'react-dom';
 
 interface SidebarProps {
     isSidebarOpen: boolean;
@@ -98,30 +99,34 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
                 </div>
             </div>
             {/* Premium Popup */}
-            {showPremiumPopup && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-700">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-bold text-white">Unlock Premium Features</h2>
+            {showPremiumPopup &&
+                typeof window !== 'undefined' &&
+                createPortal(
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+                        <div className="bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-700">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-xl font-bold text-white">Unlock Premium Features</h2>
+                                <button
+                                    onClick={() => setShowPremiumPopup(false)}
+                                    className="text-gray-400 hover:text-gray-300 transition-colors p-2 hover:bg-gray-700 rounded-lg"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <p className="text-gray-300 mb-6">
+                                Access ATS Resume Scan, Resume Builder, and Job Search with our Premium Membership.
+                            </p>
                             <button
-                                onClick={() => setShowPremiumPopup(false)}
-                                className="text-gray-400 hover:text-gray-300 transition-colors p-2 hover:bg-gray-700 rounded-lg"
+                                onClick={() => router.push('/subscription')}
+                                className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-sm"
                             >
-                                <X className="w-5 h-5" />
+                                Get Premium
                             </button>
                         </div>
-                        <p className="text-gray-300 mb-6">
-                            Access ATS Resume Scan, Resume Builder, and Job Search with our Premium Membership.
-                        </p>
-                        <button
-                            onClick={() => router.push('/subscription')}
-                            className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-sm"
-                        >
-                            Get Premium
-                        </button>
-                    </div>
-                </div>
-            )}
+                    </div>,
+                    document.body
+                )}
+
         </div>
     );
 };

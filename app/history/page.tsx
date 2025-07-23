@@ -73,8 +73,10 @@ export default function HistoryPage() {
     }, [router, showToast]);
 
 
-    const getAvgScore = (scores: { [key: number]: number }) => {
-        const values = Object.values(scores);
+    const getAvgScore = (scores: { [key: number]: number }, totalQuestions: number) => {
+        const values = Array(totalQuestions)
+            .fill(0)
+            .map((_, index) => scores[index] || 0);
         return values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
     };
 
@@ -174,7 +176,7 @@ export default function HistoryPage() {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                             {history.map((interview) => {
-                                const avgScore = getAvgScore(interview.scores);
+                                const avgScore = getAvgScore(interview.scores, interview.questions.length);
                                 const scoreLabel = getScoreLabel(avgScore);
                                 const scoreGradient = getScoreColor(avgScore);
                                 const isSelected = selectedInterview?.id === interview.id;
