@@ -100,7 +100,7 @@ const Dashboard = () => {
     const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
     const [isDataLoading, setIsDataLoading] = useState<boolean>(false);
     const [selectedChart, setSelectedChart] = useState<'area' | 'bar' | 'line' | 'composed'>('area');
-    const [selectedMetric, setSelectedMetric] = useState<'average' | 'all'>('average');
+    const [selectedMetric, setSelectedMetric] = useState<'average' | 'all'>('all');
     const [isChartExpanded, setIsChartExpanded] = useState<boolean>(false);
     const [animationKey, setAnimationKey] = useState<number>(0);
 
