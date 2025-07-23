@@ -189,6 +189,9 @@ export default function Home() {
                 localStorage.removeItem("userAnswers");
                 localStorage.removeItem("feedbacks");
                 localStorage.removeItem("scores");
+                localStorage.removeItem("interviewRole");
+                localStorage.removeItem("interviewType");
+                localStorage.removeItem("skills");
                 localStorage.removeItem("currentQuestionIndex");
                 router.push("/auth");
               }}

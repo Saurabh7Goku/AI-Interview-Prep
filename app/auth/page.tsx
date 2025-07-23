@@ -7,7 +7,7 @@ import { useToast } from "@/components/ToastProvide";
 import { Briefcase, Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
 import Image from "next/image";
 import logo from "@/public/logo.png"
-import { updateProfile } from "firebase/auth";
+import { updateProfile, sendPasswordResetEmail } from "firebase/auth";
 
 export default function AuthPage() {
     const router = useRouter();
@@ -19,6 +19,7 @@ export default function AuthPage() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [showVerifyModal, setShowVerifyModal] = useState(false);
+    const [resendCooldown, setResendCooldown] = useState(false);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -27,7 +28,6 @@ export default function AuthPage() {
                     showToast("✅ Successfully signed in!", "success");
                     router.push("/dashboard");
                 } else {
-                    // Do NOT redirect, optionally sign them out
                     showToast("⚠️ Please verify your email before signing in.", "warning");
                     auth.signOut();
                 }
@@ -53,6 +53,16 @@ export default function AuthPage() {
         }
     };
 
+    const handleForgotPassword = async () => {
+        if (!email) return showToast("❌ Enter your email to reset password.", "error");
+
+        try {
+            await sendPasswordResetEmail(auth, email);
+            showToast("✅ Password reset email sent.", "success");
+        } catch (error: any) {
+            showToast(`❌ Failed to send reset email: ${error.message}`, "error");
+        }
+    };
 
     const handleEmailAuth = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -104,19 +114,26 @@ export default function AuthPage() {
     };
 
     const resendVerificationEmail = async () => {
+        if (resendCooldown) {
+            showToast("⏳ Please wait before resending.", "warning");
+            return;
+        }
+
         const user = auth.currentUser;
         if (user && !user.emailVerified) {
             try {
                 await sendEmailVerification(user);
                 showToast("✅ New verification email sent.", "success");
+                setResendCooldown(true);
+                setTimeout(() => setResendCooldown(false), 30000);
             } catch (error: any) {
-                console.error("Error sending email verification:", error);
-                showToast(`❌ Failed to resend verification email: ${error.message}`, "error");
+                showToast(`❌ Failed to resend: ${error.message}`, "error");
             }
         } else {
-            showToast("⚠️ Email is already verified.", "warning");
+            showToast("⚠️ Email is already verified. Go to Sign In page", "warning");
         }
     };
+
 
 
     return (
@@ -189,7 +206,10 @@ export default function AuthPage() {
                             className="w-full text-white px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 text-sm"
                         />
                         {!isSignUp && (
-                            <p className="text-[10px] text-gray-500 mt-1">Forgot your password? <a href="#" className="text-blue-600 hover:underline">Reset it</a></p>
+                            <p className="text-[10px] text-gray-500 mt-1">
+                                Forgot your password?
+                                <button onClick={handleForgotPassword} className="text-blue-600 hover:underline ml-1">Reset it</button>
+                            </p>
                         )}
                     </div>
                     <button
@@ -296,14 +316,18 @@ export default function AuthPage() {
 
                                 <button
                                     onClick={async () => {
-                                        const user = auth.currentUser;
-                                        await user?.reload();
-                                        if (user?.emailVerified) {
-                                            showToast("✅ Email verified!", "success");
-                                            setShowVerifyModal(false);
-                                            router.push("/dashboard");
-                                        } else {
-                                            showToast("❌ Email not verified yet.", "error");
+                                        try {
+                                            const user = auth.currentUser;
+                                            await user?.reload();
+                                            if (user?.emailVerified) {
+                                                showToast("✅ Email verified!", "success");
+                                                setShowVerifyModal(false);
+                                                router.push("/dashboard");
+                                            } else {
+                                                showToast("❌ Email not verified yet.", "error");
+                                            }
+                                        } catch (error: any) {
+                                            showToast(`❌ Failed to check verification: ${error.message}`, "error");
                                         }
                                     }}
                                     className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center gap-2"

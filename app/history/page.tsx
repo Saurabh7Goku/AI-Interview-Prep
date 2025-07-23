@@ -167,7 +167,7 @@ export default function HistoryPage() {
                             <p className="text-gray-300 text-xl font-semibold">No interviews yet</p>
                             <p className="text-gray-500 mt-2">Complete your first interview to see it here</p>
                             <button
-                                onClick={() => router.push("/mock-interview")}
+                                onClick={() => router.push("/homeform")}
                                 className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                             >
                                 Start Interview

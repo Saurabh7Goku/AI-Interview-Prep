@@ -4,7 +4,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import logo from '@/public/logo.png';
 import { createPortal } from 'react-dom';
-import { auth } from "@/firebase/firebase";
+import { auth, signOut } from "@/firebase/firebase";
+import toast from 'react-hot-toast';
 
 interface SidebarProps {
     isSidebarOpen: boolean;
@@ -16,6 +17,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
     const pathname = usePathname();
     const [showPremiumPopup, setShowPremiumPopup] = useState(false);
     const [userName, setUserName] = useState("");
+
+    const handleSignOut = async () => {
+        try {
+            await signOut(auth);
+            toast.success('Signed out successfully!');
+            router.push('/');
+        } catch (error) {
+            toast.error('Sign-out failed. Please try again.');
+        }
+    };
 
     const sidebarItems: {
         name: string;
@@ -75,6 +86,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
                                     setIsSidebarOpen(false);
                                     if (item.action === 'logout') {
                                         localStorage.clear();
+                                        handleSignOut();
                                         router.push('/');
                                     } if (item.action === 'subscription') {
                                         setShowPremiumPopup(true);
