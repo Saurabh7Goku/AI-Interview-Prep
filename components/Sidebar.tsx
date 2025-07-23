@@ -22,7 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
         action?: string;
     }[] = [
             { name: 'Dashboard', icon: Home, path: '/dashboard' },
-            { name: 'ATS Scan', icon: FileText, action: 'subscription' },
+            { name: 'ATS Scan', icon: FileText, path: 'https://ats-resume-a7rk.onrender.com' },
             { name: 'Job Finder', icon: Search, action: 'subscription' },
             { name: 'Mock Interview', icon: Users, path: '/homeform' },
             { name: 'History', icon: History, path: '/history' },
