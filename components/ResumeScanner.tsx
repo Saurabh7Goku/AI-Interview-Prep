@@ -17,6 +17,7 @@ import AuthButton from "./AuthButton";
 import { ATSReport } from "@/types";
 import logo from "@/public/logo.png";
 import { useRouter } from "next/navigation";
+import resume from "@/public/dummy-resume.png"
 
 
 
@@ -398,7 +399,7 @@ export default function ResumeScanner() {
                                             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-3xl transform rotate-3 scale-105"></div>
                                             <div className="relative bg-white rounded-3xl shadow-2xl p-8 transform -rotate-2 hover:rotate-0 transition-transform duration-500">
                                                 <Image
-                                                    src="/dummy-resume.png"
+                                                    src={resume}
                                                     alt="Resume Preview"
                                                     width={0}
                                                     height={0}
