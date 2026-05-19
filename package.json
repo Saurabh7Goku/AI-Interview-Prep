@@ -30,6 +30,7 @@
     "highlight.js": "^11.11.1",
     "lucide-react": "^0.525.0",
     "next": "15.3.8",
+    "openai": "^4.52.0",
     "pdf-parse": "^1.1.1",
     "pdf2pic": "^3.2.0",
     "pdfjs-dist": "^5.3.93",

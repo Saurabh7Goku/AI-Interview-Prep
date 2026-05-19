@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import * as nvidiaApi from './nvidia';
 
 const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
@@ -35,36 +36,49 @@ export async function generateQuestions(
   .filter(Boolean)
   .join('\n');
   
-  
+  try {
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
-  const response = await fetch(GEMINI_API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: prompt }],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.7,
-        topP: 0.9
-      }
-    }),
-  });
+    const response = await fetch(GEMINI_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: prompt }],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.9
+        }
+      }),
+    });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    return rawText
+      .split("\n")
+      .map((q: string) => q.replace(/^\d+\.\s*/, "").trim())
+      .filter((q: string) => q);
+  } catch (error) {
+    console.warn('Gemini API failed, falling back to NVIDIA API:', error);
+    // Fallback to NVIDIA API
+    return await nvidiaApi.generateQuestionsNvidia(
+      jobProfile,
+      experienceLevel,
+      skills,
+      interviewType,
+      language,
+      targetCompany,
+      focusTopics
+    );
   }
-
-  const data = await response.json();
-  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-  return rawText
-    .split("\n")
-    .map((q: string) => q.replace(/^\d+\.\s*/, "").trim())
-    .filter((q: string) => q);
 }
 
 export async function evaluateAnswer(question: string, userAnswer: string) {
@@ -89,31 +103,38 @@ export async function evaluateAnswer(question: string, userAnswer: string) {
     **Keep your response concise and to the point.**
     `.trim();
     
-    const response = await fetch(GEMINI_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            contents: [
-                {
-                    role: "user",
-                    parts: [{ text: prompt }],
-                },
-            ],
-        }),
-    });
+    try {
+      const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+      
+      const response = await fetch(GEMINI_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+              contents: [
+                  {
+                      role: "user",
+                      parts: [{ text: prompt }],
+                  },
+              ],
+          }),
+      });
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+      if (!response.ok) {
+          throw new Error(`Gemini API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      if (!rawText.includes("Score:")) {
+          return `Ideal Answer: Not available\nScore: 0\nFeedback: Unable to parse evaluation response from API.`;
+      }
+
+      return rawText;
+    } catch (error) {
+      console.warn('Gemini API failed, falling back to NVIDIA API:', error);
+      // Fallback to NVIDIA API
+      return await nvidiaApi.evaluateAnswerNvidia(question, userAnswer);
     }
-
-    const data = await response.json();
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    if (!rawText.includes("Score:")) {
-        return `Ideal Answer: Not available\nScore: 0\nFeedback: Unable to parse evaluation response from API.`;
-    }
-
-    return rawText;
 }
 
 export async function getIdealAnswer(question: string) {
@@ -129,27 +150,34 @@ Provide the ideal answer for the following interview question: "${question}"
 Return only the ideal answer.
 ${isCodingQuestion ? "If the question requires writing code, provide a correct and efficient code example." : ""}`.trim();
 
-  const response = await fetch(GEMINI_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-          contents: [
-              {
-                  role: "user",
-                  parts: [{ text: prompt }],
-              },
-          ],
-      }),
-  });
+  try {
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+    
+    const response = await fetch(GEMINI_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            contents: [
+                {
+                    role: "user",
+                    parts: [{ text: prompt }],
+                },
+            ],
+        }),
+    });
 
-  if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+    if (!response.ok) {
+        throw new Error(`Gemini API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    return rawText.trim() || "Ideal answer not available.";
+  } catch (error) {
+    console.warn('Gemini API failed, falling back to NVIDIA API:', error);
+    // Fallback to NVIDIA API
+    return await nvidiaApi.getIdealAnswerNvidia(question);
   }
-
-  const data = await response.json();
-  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-  return rawText.trim() || "Ideal answer not available.";
 }
 
 const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '');
@@ -201,7 +229,8 @@ export async function scanResume(
     const json = JSON.parse(jsonString);
     return json;
   } catch (error) {
-    console.error('Gemini API error:', error);
-    throw new Error('Failed to scan resume');
+    console.warn('Gemini API failed for resume scan, falling back to NVIDIA API:', error);
+    // Fallback to NVIDIA API
+    return await nvidiaApi.scanResumeNvidia(resumeText, jobDescription, yearsOfExperience);
   }
 }
