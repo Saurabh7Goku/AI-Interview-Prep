@@ -2,7 +2,6 @@
 import { useEffect, useState, useRef } from "react";
 import InterviewQuestion from "@/components/InterviewQuestion";
 import { useRouter } from "next/navigation";
-import { evaluateAnswer, getIdealAnswer } from "@/lib/gemini";
 import { auth, saveInterview } from "@/firebase/firebase";
 import { Briefcase, Clock, MessageSquare, User, ArrowLeft, CheckCircle, Camera, CameraOff, Menu, X, Volume2, VolumeX } from "lucide-react";
 import WebcamPreview from "@/components/WebcamPreview";
@@ -202,7 +201,13 @@ export default function InterviewPage() {
         if (userAnswer === "Skipped") {
             try {
                 console.log(`Fetching ideal answer for question ${currentIndex + 1}: ${questions[currentIndex]}`);
-                const idealAnswer = await getIdealAnswer(questions[currentIndex]);
+                const response = await fetch("/api/getIdealAnswer", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ question: questions[currentIndex] }),
+                });
+                const data = await response.json();
+                const idealAnswer = data.idealAnswer;
                 updatedFeedbacks = {
                     ...feedbacks,
                     [currentIndex]: `Ideal Answer: ${idealAnswer}`,
@@ -223,7 +228,13 @@ export default function InterviewPage() {
         } else {
             try {
                 console.log(`Evaluating answer for question ${currentIndex + 1}: ${questions[currentIndex]}`);
-                const evaluation = await evaluateAnswer(questions[currentIndex], userAnswer);
+                const response = await fetch("/api/evaluateAnswer", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ question: questions[currentIndex], userAnswer }),
+                });
+                const data = await response.json();
+                const evaluation = data.evaluation;
                 const match = evaluation.match(/(?:\*\*)?Score:(?:\*\*)?\s*(\d+)(?:\/10)?/i);
                 const score = match ? parseInt(match[1]) : 0;
 

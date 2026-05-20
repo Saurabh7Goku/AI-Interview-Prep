@@ -2,10 +2,13 @@
   "name": "ai-interview-prep",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20 <25"
+  },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "set NODE_OPTIONS= && next dev",
+    "build": "set NODE_OPTIONS= && next build",
+    "start": "set NODE_OPTIONS= && next start",
     "lint": "next lint"
   },
   "dependencies": {

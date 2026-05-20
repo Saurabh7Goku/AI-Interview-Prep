@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { scanResume } from '@/lib/gemini';
+import * as nvidiaApi from '@/lib/nvidia';
 import pdfParse from 'pdf-parse';
 
 export const runtime = 'nodejs';
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const pdfData = await pdfParse(buffer);
     const resumeText = pdfData.text;
 
-    const report = await scanResume(resumeText, jobDescription, yearsOfExperience);
+    const report = await nvidiaApi.scanResumeNvidia(resumeText, jobDescription, yearsOfExperience);
 
     return NextResponse.json({ ...report, resumeText });
   } catch (error: any) {

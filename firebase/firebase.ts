@@ -1,7 +1,8 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, collection, addDoc, getDocs, query, where,Timestamp} from "firebase/firestore";
 import { signOut, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { getApp, getApps } from "firebase/app";
 
 // Define the Interview interface to match the data structure
 export interface Interview {
@@ -26,8 +27,9 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+export const auth: Auth =
+  typeof window !== "undefined" ? getAuth(app) : ({} as Auth);
 export const db = getFirestore(app);
   
 export async function saveInterview(userId: string, interviewData: {
